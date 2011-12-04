@@ -54,4 +54,7 @@
   <!-- SamsungCdmaAlternateMessageIDEncoding -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
+  <!-- legacyUmsLunFile -->
+  <java-symbol type="string" name="config_legacyUmsLunFile" />
+
 </resources>
