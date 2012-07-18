@@ -28,6 +28,7 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.service.notification.StatusBarNotification;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -186,6 +187,9 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
+
+    // clock
+    private boolean mShowClock;
 
     private int mSystemUiVisibility = 0;
 
@@ -967,10 +971,13 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void showClock(boolean show) {
+        ContentResolver resolver = mContext.getContentResolver();
         View clock = mBarContents.findViewById(R.id.clock);
         View network_text = mBarContents.findViewById(R.id.network_text);
+        mShowClock = (Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_CLOCK, 1) == 1);
         if (clock != null) {
-            clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            clock.setVisibility(show ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE);
         }
         if (network_text != null) {
             network_text.setVisibility((!show) ? View.VISIBLE : View.GONE);
