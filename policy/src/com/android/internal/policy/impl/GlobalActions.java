@@ -430,16 +430,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 });
         }
 
+        // next: optionally add a list of users to switch to
+        boolean showUsers = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_USER_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        if (showUsers) {
+            addUsersToMenu(mItems);
+        }
+
         // last: silent mode
         if ((Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.POWER_MENU_SOUND_ENABLED, 1) == 1) &&
                 (SHOW_SILENT_TOGGLE)) {
             mItems.add(mSilentModeAction);
-        }
-
-        // one more thing: optionally add a list of users to switch to
-        if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
-            addUsersToMenu(mItems);
         }
 
         mAdapter = new MyAdapter();
