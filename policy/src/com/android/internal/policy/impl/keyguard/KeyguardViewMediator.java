@@ -22,6 +22,8 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.SearchManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -247,6 +249,10 @@ public class KeyguardViewMediator {
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
+
+    private ProfileManager mProfileManager;
+
+    private int mSlideLockDelay;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -514,6 +520,8 @@ public class KeyguardViewMediator {
         mKeyguardViewManager = new KeyguardViewManager(context, wm, mViewMediatorCallback,
                 mLockPatternUtils);
 
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
+
         mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
         mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                 | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -586,15 +594,26 @@ public class KeyguardViewMediator {
     public void onScreenTurnedOff(int why) {
         synchronized (this) {
             mScreenOn = false;
+            mSlideLockDelay = why;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
 
             mKeyguardDonePending = false;
 
-            // Lock immediately based on setting if secure (user has a pin/pattern/password).
-            // This also "locks" the device when not secure to provide easy access to the
-            // camera while preventing unwanted input.
-            final boolean lockImmediately =
-                mLockPatternUtils.getPowerButtonInstantlyLocks() || !mLockPatternUtils.isSecure();
+            // Prepare for handling Lock/Slide lock delay and timeout
+            boolean lockImmediately = false;
+            final ContentResolver cr = mContext.getContentResolver();
+            boolean separateSlideLockTimeoutEnabled = Settings.System.getInt(cr,
+                    Settings.System.SCREEN_LOCK_SLIDE_DELAY_TOGGLE, 0) == 1;
+            if (mLockPatternUtils.isSecure()) {
+                // Lock immediately based on setting if secure (user has a pin/pattern/password)
+                // This is retained as-is to ensue AOSP security integrity is maintained
+                lockImmediately = mLockPatternUtils.getPowerButtonInstantlyLocks();
+            } else {
+                // Unless a separate slide lock timeout is enabled, this "locks" the device when
+                // not secure to provide easy access to the camera while preventing unwanted input
+                lockImmediately = separateSlideLockTimeoutEnabled ? false
+                        : mLockPatternUtils.getPowerButtonInstantlyLocks();
+            }
 
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
@@ -634,6 +653,18 @@ public class KeyguardViewMediator {
                 Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
                 KEYGUARD_LOCK_AFTER_DELAY_DEFAULT);
 
+        // From CyanogenMod specific Settings
+        // If utilizing a secured lock screen, we should not utilize the slide
+        // delay and should let it default to the standard delay
+        boolean separateSlideLockTimeoutEnabled = (mLockPatternUtils.isSecure() ? false
+                : Settings.System.getInt(cr,
+                        Settings.System.SCREEN_LOCK_SLIDE_DELAY_TOGGLE, 0) == 1);
+
+        int slideLockTimeoutDelay = (mSlideLockDelay == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT ? Settings.System
+                .getInt(cr, Settings.System.SCREEN_LOCK_SLIDE_TIMEOUT_DELAY,
+                        KEYGUARD_LOCK_AFTER_DELAY_DEFAULT) : Settings.System.getInt(cr,
+                                Settings.System.SCREEN_LOCK_SLIDE_SCREENOFF_DELAY, 0));
+
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
                 .getMaximumTimeToLock(null, mLockPatternUtils.getCurrentUser());
@@ -644,7 +675,7 @@ public class KeyguardViewMediator {
             displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
             timeout = Math.min(policyTimeout - displayTimeout, lockAfterTimeout);
         } else {
-            timeout = lockAfterTimeout;
+            timeout = separateSlideLockTimeoutEnabled ? slideLockTimeoutDelay : lockAfterTimeout;
         }
 
         if (timeout <= 0) {
@@ -684,13 +715,28 @@ public class KeyguardViewMediator {
     }
 
     private void maybeSendUserPresentBroadcast() {
-        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled()
-                && mUserManager.getUsers(true).size() == 1) {
-            // Lock screen is disabled because the user has set the preference to "None".
-            // In this case, send out ACTION_USER_PRESENT here instead of in
-            // handleKeyguardDone()
+        if (mSystemReady && isKeyguardDisabled()) {
             sendUserPresentBroadcast();
         }
+    }
+
+    private boolean isKeyguardDisabled() {
+        if (!mExternallyEnabled) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled externally");
+            return true;
+        }
+        if (mLockPatternUtils.isLockScreenDisabled() && mUserManager.getUsers(true).size() == 1) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by setting");
+            return true;
+        }
+        Profile profile = mProfileManager.getActiveProfile();
+        if (profile != null) {
+            if (profile.getScreenLockModeWithDPM(mContext) == Profile.LockMode.DISABLE) {
+                if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by profile");
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -849,11 +895,10 @@ public class KeyguardViewMediator {
 
     /**
      * Given the state of the keyguard, is the input restricted?
-     * Input is restricted when the keyguard is showing, or when the keyguard
-     * was suppressed by an app that disabled the keyguard or we haven't been provisioned yet.
+     * Input is restricted when the keyguard is showing or we haven't been provisioned yet.
      */
     public boolean isInputRestricted() {
-        return mShowing || mNeedToReshowWhenReenabled || !mUpdateMonitor.isDeviceProvisioned();
+        return mShowing || !mUpdateMonitor.isDeviceProvisioned();
     }
 
     private void doKeyguardLocked() {
@@ -864,22 +909,6 @@ public class KeyguardViewMediator {
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
-        // if another app is disabling us, don't show
-        if (!mExternallyEnabled) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
-
-            // note: we *should* set mNeedToReshowWhenReenabled=true here, but that makes
-            // for an occasional ugly flicker in this situation:
-            // 1) receive a call with the screen on (no keyguard) or make a call
-            // 2) screen times out
-            // 3) user hits key to turn screen back on
-            // instead, we reenable the keyguard when we know the screen is off and the call
-            // ends (see the broadcast receiver below)
-            // TODO: clean this up when we have better support at the window manager level
-            // for apps that wish to be on top of the keyguard
-            return;
-        }
-
         // if the keyguard is already showing, don't bother
         if (mKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
@@ -902,9 +931,9 @@ public class KeyguardViewMediator {
             return;
         }
 
-        if (mUserManager.getUsers(true).size() < 2
-                && mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
+        // if we're disabled by an app or profile, don't show
+        if (!lockedOrMissing && isKeyguardDisabled()) {
+            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because keyguard is disabled");
             return;
         }
 
