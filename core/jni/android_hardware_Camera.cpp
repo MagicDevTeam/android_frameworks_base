@@ -459,6 +459,7 @@ void JNICameraContext::setCallbackMode(JNIEnv *env, bool installed, bool manualM
     }
 }
 
+
 static void android_hardware_Camera_setLongshot(JNIEnv *env, jobject thiz, jboolean enable)
 {
     ALOGV("setLongshot");
@@ -1078,6 +1079,9 @@ static JNINativeMethod camMethods[] = {
  { "native_setLongshot",
      "(Z)V",
       (void *)android_hardware_Camera_setLongshot },
+  { "native_sendHistogramData",
+    "()V",
+     (void *)android_hardware_Camera_sendHistogramData },
   { "native_setParameters",
     "(Ljava/lang/String;)V",
     (void *)android_hardware_Camera_setParameters },

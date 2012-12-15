@@ -1643,18 +1643,26 @@ public class Camera {
         void onCameraMetaData(byte[] data, Camera camera);
     };
 
-    /** @hide
-     * Set camera meta data and registers a callback function to run.
-     *  Only valid after startPreview() has been called.
-     *
-     * @param cb the callback to run
-     */
     public final void setMetadataCb(CameraMetaDataCallback cb)
     {
         mCameraMetaDataCallback = cb;
         native_setMetadataCb(cb!=null);
     }
     private native final void native_setMetadataCb(boolean mode);
+
+     /** @hide
+     * Set camera face detection mode and registers a callback function to run.
+     *  Only valid after startPreview() has been called.
+     *
+     * @param cb the callback to run
+     */
+    //TBD
+    public final void setFaceDetectionCb(CameraMetaDataCallback cb)
+    {
+        mCameraMetaDataCallback = cb;
+        native_setFaceDetectionCb(cb!=null);
+    }
+    private native final void native_setFaceDetectionCb(boolean mode);
 
     /** @hide
      * Set camera face detection command to send meta data.
@@ -4406,7 +4414,6 @@ public class Camera {
          }
 
          /** @hide
-         * Gets the supported Video HDR modes.
          *
          * @return a List of Video HDR_OFF/OFF string constants. null if
          * Video HDR mode setting is not supported.
