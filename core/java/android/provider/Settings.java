@@ -2751,6 +2751,13 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * Whether power menu silent mode is enabled
+         * @hide
+         */
+        public static final String POWER_MENU_SOUND_ENABLED = "power_menu_silent_enabled";
+
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -2835,6 +2842,15 @@ public final class Settings {
             QUIET_HOURS_MUTE,
             QUIET_HOURS_STILL,
             QUIET_HOURS_DIM,
+            SYSTEM_PROFILES_ENABLED,
+            POWER_MENU_SCREENSHOT_ENABLED,
+            POWER_MENU_REBOOT_ENABLED,
+            POWER_MENU_PROFILES_ENABLED,
+            POWER_MENU_AIRPLANE_ENABLED,
+            POWER_MENU_SOUND_ENABLED,
+            POWER_MENU_USER_ENABLED,
+            LOCKSCREEN_VIBRATE_ENABLED,
+            LOCKSCREEN_ALWAYS_SHOW_BATTERY,
         };
 
         // Settings moved to Settings.Secure
