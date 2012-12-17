@@ -4198,10 +4198,6 @@
     <!-- In WiFi AP notification -->
     <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
 
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
-
     <!-- The title of the profile picker dialog. -->
     <string name="profile_picker_title">Profiles</string>
 
@@ -4225,4 +4221,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_cancelNotifications">Allows the app to cancel notifications created by other apps.</string>
 
+    <!-- Hardware Rotation lock string -->
+    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
+    <string name="toast_rotation_locked">Display rotation locked</string>
 </resources>
