@@ -228,4 +228,5 @@
     <dimen name="status_bar_battery_cluster_text_margin">-1dip</dimen>
 
     <dimen name="wifi_combo_margin_right">-6dp</dimen>
+
 </resources>

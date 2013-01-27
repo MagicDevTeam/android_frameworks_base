@@ -35,21 +35,21 @@ public class DockBatteryController extends BatteryController {
     public DockBatteryController(Context context) {
         this(context, true);
     }
-    
+
     public DockBatteryController(Context context, boolean ui) {
-        super(context);
-    }    
+        super(context, ui);
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_DOCK_LEVEL, 0);
             mDockBatteryStatus = intent.getIntExtra(
-                                        BatteryManager.EXTRA_STATUS,
+                                        BatteryManager.EXTRA_DOCK_STATUS,
                                         BatteryManager.BATTERY_STATUS_UNKNOWN);
-            mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-            mBatteryPresent = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, false);
+            mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_DOCK_PLUGGED, 0) != 0;
+            mBatteryPresent = intent.getBooleanExtra(BatteryManager.EXTRA_DOCK_PRESENT, false);
             updateViews();
             updateBattery();
         }
@@ -57,7 +57,9 @@ public class DockBatteryController extends BatteryController {
 
     @Override
     protected void updateViews() {
-        super.updateViews();
+        if (isUiController()) {
+            super.updateViews();
+        }
 
         for (DockBatteryStateChangeCallback cb : mChangeCallbacks) {
             cb.onDockBatteryLevelChanged(getBatteryLevel(), isBatteryPresent(), getBatteryStatus());
@@ -79,6 +81,27 @@ public class DockBatteryController extends BatteryController {
 
     public void removeStateChangedCallback(DockBatteryStateChangeCallback cb) {
         mChangeCallbacks.remove(cb);
+    }
+
+    @Override
+    public int getIconStyleUnknown() {
+        return R.drawable.stat_sys_kb_battery_unknown;
+    }
+    @Override
+    public int getIconStyleNormal() {
+        return R.drawable.stat_sys_kb_battery;
+    }
+    @Override
+    public int getIconStyleCharge() {
+        return R.drawable.stat_sys_kb_battery_charge;
+    }
+    @Override
+    public int getIconStyleNormalMin() {
+        return R.drawable.stat_sys_kb_battery_min;
+    }
+    @Override
+    public int getIconStyleChargeMin() {
+        return R.drawable.stat_sys_kb_battery_charge_min;
     }
 
     @Override

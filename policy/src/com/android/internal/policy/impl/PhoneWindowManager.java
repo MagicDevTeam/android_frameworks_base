@@ -70,6 +70,19 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+
+import com.android.internal.R;
+import com.android.internal.app.ThemeUtils;
+import com.android.internal.os.DeviceKeyHandler;
+import com.android.internal.os.IDeviceHandler;
+import com.android.internal.policy.PolicyManager;
+import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
+import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.widget.PointerLocationView;
+
+>>>>>>> 042159d... SystemUI: Add dock battery icon styles
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -117,7 +130,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.lang.reflect.Constructor;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -227,6 +239,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         sApplicationLaunchKeyCategories.append(
                 KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
     }
+
+    private final DeviceKeyHandler mDeviceKeyHandler;
 
     /**
      * Lock protecting internal state.  Must not call out into window
@@ -695,6 +709,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     MyOrientationListener mOrientationListener;
+
+    public PhoneWindowManager(IDeviceHandler device) {
+        mDeviceKeyHandler = (device != null) ? device.getDeviceKeyHandler() : null;
+    }
 
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
