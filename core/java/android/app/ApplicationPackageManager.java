@@ -1302,7 +1302,6 @@ final class ApplicationPackageManager extends PackageManager {
         return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
     }
 
-
     @Override
     public boolean isThemeCompatibilityModeEnabled(String packageName) {
         try {
@@ -1318,6 +1317,25 @@ final class ApplicationPackageManager extends PackageManager {
     public void setThemeCompatibilityMode(String packageName, boolean compatEnabled) {
         try {
             mPM.setThemeCompatibilityMode(packageName, compatEnabled);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public String[] getRevokedPermissions(String packageName) {
+        try {
+            return mPM.getRevokedPermissions(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return new String[0];
+    }
+
+    @Override
+    public void setRevokedPermissions(String packageName, String[] perms) {
+        try {
+            mPM.setRevokedPermissions(packageName, perms);
         } catch (RemoteException e) {
             // Should never happen!
         }

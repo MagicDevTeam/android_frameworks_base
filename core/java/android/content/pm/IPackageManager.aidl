@@ -402,4 +402,7 @@ interface IPackageManager {
 
     boolean isThemeCompatibilityModeEnabled(String packageName);
     void setThemeCompatibilityMode(String packageName, boolean compatEnabled);
+
+    String[] getRevokedPermissions(String packageName);
+    void setRevokedPermissions(String packageName, in String[] perms);
 }

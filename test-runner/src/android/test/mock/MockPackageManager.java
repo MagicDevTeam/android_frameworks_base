@@ -624,4 +624,20 @@ public class MockPackageManager extends PackageManager {
     public void setThemeCompatibilityMode(String packageName, boolean compatEnabled) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public String[] getRevokedPermissions(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setRevokedPermissions(String packageName, String[] perms) {
+        throw new UnsupportedOperationException();
+    }
 }

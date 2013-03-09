@@ -3127,6 +3127,29 @@ public abstract class PackageManager {
     public abstract void setThemeCompatibilityMode(String packageName, boolean compatOn);
 
     /**
+     * Returns the revoked permissions for given package.
+     * <p>
+     * NOTE: If the package has a shared uid then the revoked permissions for that
+     *       uid will be returned.
+     *
+     * @param packageName Name of the package which revoked permissions are needed
+     * @hide
+     */
+    public abstract String[] getRevokedPermissions(String packageName);
+
+    /**
+     * Sets the revoked permissions for given package.
+     * <p>
+     * NOTE: If the package has a shared uid then this method will revoke the
+     *       permissions for that shared uid.
+     *
+     * @param packageName Name of the package which revoked permissions are needed
+     * @param the revoked permissions.
+     * @hide
+     */
+    public abstract void setRevokedPermissions(String packageName, String[] perms);
+
+    /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular
      * device. This should not be used by anything other than a package verifier.
      * 
