@@ -34,7 +34,7 @@ public class DctConstants {
      *
      * getDataConnectionState() maps State to DataState
      *      FAILED or IDLE : DISCONNECTED
-     *      CONNECTING or SCANNING: CONNECTING
+     *      RETRYING or CONNECTING or SCANNING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
     public enum State {
