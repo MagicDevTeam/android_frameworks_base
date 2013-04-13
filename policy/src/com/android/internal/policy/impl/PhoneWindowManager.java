@@ -19,6 +19,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
+import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.UiModeManager;
@@ -462,6 +463,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeUpKeyTriggered;
     private boolean mPowerKeyTriggered;
     private long mPowerKeyTime;
+    private KeyguardManager mKeyguardManager;
 
     SettingsObserver mSettingsObserver;
     ShortcutManager mShortcutManager;
@@ -793,13 +795,50 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    private final Runnable mRingerChordLongPress = new Runnable() {
+        public void run() {
+            // Do the switch
+            final AudioManager am = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
+            final int ringerMode = am.getRingerMode();
+            final VolumePanel volumePanel = new VolumePanel(ThemeUtils.createUiContext(mContext),
+                                                              (AudioService) getAudioService());
+            if (ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                boolean vibrateSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) != 0;
+                am.setRingerMode(vibrateSetting ? AudioManager.RINGER_MODE_VIBRATE :
+                                   AudioManager.RINGER_MODE_SILENT);
+            } else {
+                am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            }
+            volumePanel.postVolumeChanged(AudioManager.STREAM_RING,AudioManager.FLAG_SHOW_UI
+                                          | AudioManager.FLAG_VIBRATE);
+        }
+    };
+
+    Runnable mBackLongPress = new Runnable() {
+        public void run() {
+            if (DevUtils.killForegroundApplication(mContext)) {
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                Toast.makeText(mContext, R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    private KeyguardManager getKeyguardManager() {
+        if (mKeyguardManager == null) {
+            mKeyguardManager = (KeyguardManager) mContext.getSystemService(
+                    Context.KEYGUARD_SERVICE);
+        }
+        return mKeyguardManager;
+    }
+
     void showGlobalActionsDialog() {
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
         }
-        final boolean keyguardShowing = keyguardIsShowingTq();
-        mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
-        if (keyguardShowing) {
+        final boolean keyguardLocked = getKeyguardManager().isKeyguardLocked();
+        mGlobalActions.showDialog(keyguardLocked, isDeviceProvisioned());
+        if (keyguardLocked) {
             // since it took two seconds of long press to bring this up,
             // poke the wake lock so they have some time to see the dialog.
             mKeyguardMediator.userActivity();
