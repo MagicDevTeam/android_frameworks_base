@@ -2808,6 +2808,15 @@ public final class Settings {
                 "status_bar_circle_battery_animationspeed";
 
         /**
+         * MediaScanner behavior on boot.
+         * 0 = enabled
+         * 1 = ask (notification)
+         * 2 = disabled
+         * @hide
+         */
+         public static final String MEDIA_SCANNER_ON_BOOT = "media_scanner_on_boot";
+
+        /**
          * Battery warning preferences
          *
          * 0 = show dialog + play sound (default)
