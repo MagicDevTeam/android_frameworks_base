@@ -31,10 +31,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.XmlResourceParser;
+
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiSsid;
 import android.net.wifi.WifiInfo;
 import android.os.Environment;
+import android.net.wifi.SupplicantState;
+
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
@@ -86,6 +89,9 @@ public class ProfileManagerService extends IProfileManager.Stub {
     private WifiManager mWifiManager;
     private String mLastConnectedSSID;
 
+    private WifiManager mWifiManager;
+    private String mlastConnectedSSID;
+
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -96,6 +102,30 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 initialize();
             } else if (action.equals(Intent.ACTION_SHUTDOWN)) {
                 persistIfDirty();
+
+            } else if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+                SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                int triggerState;
+                switch (state) {
+                    case COMPLETED:
+                        triggerState = Profile.TriggerState.ON_CONNECT;
+                        mlastConnectedSSID = getActiveSSID();
+                        break;
+                    case DISCONNECTED:
+                        triggerState = Profile.TriggerState.ON_DISCONNECT;
+                        break;
+                    default:
+                        return;
+                }
+                for (Profile p : mProfiles.values()) {
+                    if (triggerState ==  p.getWifiTrigger(mlastConnectedSSID)) {
+                        try {
+                            setActiveProfile(p, true);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Could not update profile on wifi AP change", e);
+                        }
+                    }
+                }
             }
         }
     };
@@ -116,6 +146,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         filter.addAction(Intent.ACTION_SHUTDOWN);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter);
     }
 
@@ -150,6 +181,10 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 Log.e(TAG, "Error loading xml from resource: ", ex);
             }
         }
+    }
+
+    private String getActiveSSID() {
+        return mWifiManager.getConnectionInfo().getSSID().replace("\"", "");
     }
 
     @Override
