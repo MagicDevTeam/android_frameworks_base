@@ -1,27 +1,39 @@
-package com.android.systemui.quicksettings;
+
+package com.android.systemui.statusbar.powerwidget;
+
+import com.android.systemui.R;
+
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.QuickSettingsController;
-import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RingerModeTile extends QuickSettingsTile {
+public class SoundButton extends PowerButton {
 
-    private static final String SEPARATOR = "OV=I=XseparatorX=I=VO";
+    private static final String TAG = "SoundButton";
 
-    // Define the available ringer modes
+    private static final IntentFilter INTENT_FILTER = new IntentFilter();
+    static {
+        INTENT_FILTER.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+    }
+
+    private static final List<Uri> OBSERVED_URIS = new ArrayList<Uri>();
+    static {
+        OBSERVED_URIS.add(Settings.System.getUriFor(Settings.System.EXPANDED_RING_MODE));
+        OBSERVED_URIS.add(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
+    }
+
     private final Ringer mSilentRinger = new Ringer(AudioManager.RINGER_MODE_SILENT, false);
     private final Ringer mVibrateRinger = new Ringer(AudioManager.RINGER_MODE_VIBRATE, true);
     private final Ringer mSoundRinger = new Ringer(AudioManager.RINGER_MODE_NORMAL, false);
@@ -29,92 +41,47 @@ public class RingerModeTile extends QuickSettingsTile {
     private final Ringer[] mRingers = new Ringer[] {
             mSilentRinger, mVibrateRinger, mSoundRinger, mSoundVibrateRinger
     };
-
     private int mRingersIndex;
     private int[] mRingerValues = new int[] {
             0, 1, 2, 3
     };
     private int mRingerValuesIndex;
-
     private AudioManager mAudioManager;
 
-    public RingerModeTile(Context context, QuickSettingsController qsc) {
-        super(context, qsc);
-
-        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-
-        // Tile actions
-        mOnClick = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleState();
-                updateResources();
-            }
-        };
-
-        mOnLongClick = new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_SOUND_SETTINGS);
-                return true;
-            }
-        };
-        qsc.registerAction(AudioManager.RINGER_MODE_CHANGED_ACTION, this);
-        qsc.registerObservedContent(Settings.System.getUriFor(Settings.System.EXPANDED_RING_MODE)
-                , this);
-        qsc.registerObservedContent(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING)
-                , this);
+    public SoundButton() {
+        mType = BUTTON_SOUND;
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        updateResources();
+    protected void setupButton(View view) {
+        super.setupButton(view);
+        if (mView != null) {
+            Context context = mView.getContext();
+            updateSettings(context.getContentResolver());
+        }
     }
 
     @Override
-    public void onChangeUri(ContentResolver resolver, Uri uri) {
-        updateSettings(mContext.getContentResolver());
-        updateResources();
-    }
-
-    @Override
-    void onPostCreate() {
-        // Load the available ringer modes
-        updateSettings(mContext.getContentResolver());
-
-        // Make sure we show the initial state correctly
-        updateTile();
-
-        super.onPostCreate();
-    }
-
-    @Override
-    public void updateResources() {
-        updateTile();
-        super.updateResources();
-    }
-
-    private synchronized void updateTile() {
-        // The title does not change
-        mLabel = mContext.getString(R.string.quick_settings_ringer_normal);
-
-        // The icon will change depending on index
-        findCurrentState();
+    protected void updateState(Context context) {
+        findCurrentState(context);
         switch (mRingersIndex) {
             case 0:
-                mDrawable = R.drawable.ic_qs_ring_off;
+                mIcon = R.drawable.stat_silent;
+                mState = STATE_DISABLED;
                 break;
             case 1:
-                mDrawable = R.drawable.ic_qs_vibrate_on;
+                mIcon = R.drawable.stat_vibrate_off;
+                mState = STATE_DISABLED;
                 break;
             case 2:
-                mDrawable = R.drawable.ic_qs_ring_on;
+                mIcon = R.drawable.stat_ring_on;
+                mState = STATE_ENABLED;
                 break;
             case 3:
-                mDrawable = R.drawable.ic_qs_ring_vibrate_on;
+                mIcon = R.drawable.stat_ring_vibrate_on;
+                mState = STATE_ENABLED;
                 break;
         }
-
         for (int i = 0; i < mRingerValues.length; i++) {
             if (mRingersIndex == mRingerValues[i]) {
                 mRingerValuesIndex = i;
@@ -123,27 +90,42 @@ public class RingerModeTile extends QuickSettingsTile {
         }
     }
 
-    protected void toggleState() {
+    @Override
+    protected void toggleState(Context context) {
         mRingerValuesIndex++;
         if (mRingerValuesIndex > mRingerValues.length - 1) {
             mRingerValuesIndex = 0;
         }
-
         mRingersIndex = mRingerValues[mRingerValuesIndex];
         if (mRingersIndex > mRingers.length - 1) {
             mRingersIndex = 0;
         }
-
         Ringer ringer = mRingers[mRingersIndex];
-        ringer.execute(mContext);
+        ringer.execute(context);
     }
 
-    public String[] parseStoredValue(CharSequence val) {
-        if (TextUtils.isEmpty(val)) {
-          return null;
-        } else {
-          return val.toString().split(SEPARATOR);
-        }
+    @Override
+    protected boolean handleLongClick(Context context) {
+        Intent intent = new Intent("android.settings.SOUND_SETTINGS");
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        return true;
+    }
+
+    @Override
+    protected void onChangeUri(ContentResolver cr, Uri uri) {
+        updateSettings(cr);
+    }
+
+    @Override
+    protected List<Uri> getObservedUris() {
+        return OBSERVED_URIS;
+    }
+
+    @Override
+    protected IntentFilter getBroadcastIntentFilter() {
+        return INTENT_FILTER;
     }
 
     private void updateSettings(ContentResolver resolver) {
@@ -161,24 +143,32 @@ public class RingerModeTile extends QuickSettingsTile {
         }
     }
 
-    private void findCurrentState() {
-        ContentResolver resolver = mContext.getContentResolver();
-        boolean vibrateWhenRinging = Settings.System.getIntForUser(resolver,
-                Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) == 1;
-        int ringerMode = mAudioManager.getRingerMode();
+    private void findCurrentState(Context context) {
+        ensureAudioManager(context);
 
-        Ringer ringer = new Ringer(ringerMode, vibrateWhenRinging);
-        for (int i = 0; i < mRingers.length; i++) {
-            if (mRingers[i].equals(ringer)) {
-                mRingersIndex = i;
-                break;
+            ContentResolver resolver = context.getContentResolver();
+            boolean vibrateWhenRinging = Settings.System.getIntForUser(resolver,
+                    Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) == 1;
+            int ringerMode = mAudioManager.getRingerMode();
+            Ringer ringer = new Ringer(ringerMode, vibrateWhenRinging);
+            for (int i = 0; i < mRingers.length; i++) {
+                if (mRingers[i].equals(ringer)) {
+                    mRingersIndex = i;
+                    break;
+                }
             }
+        }
+
+    private void ensureAudioManager(Context context) {
+        if (mAudioManager == null) {
+            mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         }
     }
 
     private class Ringer {
         final boolean mVibrateWhenRinging;
         final int mRingerMode;
+
 
         Ringer( int ringerMode, boolean vibrateWhenRinging) {
             mVibrateWhenRinging = vibrateWhenRinging;
@@ -188,14 +178,14 @@ public class RingerModeTile extends QuickSettingsTile {
         void execute(Context context) {
             // If we are setting a vibrating state, vibrate to indicate it
             if (mVibrateWhenRinging) {
-                Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
                 vibrator.vibrate(250);
             }
 
             // Set the desired state
             ContentResolver resolver = context.getContentResolver();
             Settings.System.putIntForUser(resolver, Settings.System.VIBRATE_WHEN_RINGING,
-                    mVibrateWhenRinging ? 1 : 0, UserHandle.USER_CURRENT);
+                    (mVibrateWhenRinging ? 1 : 0), UserHandle.USER_CURRENT);
             mAudioManager.setRingerMode(mRingerMode);
         }
 

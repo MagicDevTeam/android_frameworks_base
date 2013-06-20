@@ -211,9 +211,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mLocale = mContext.getResources().getConfiguration().locale;
-        mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
-        
         mStatusBarContainer = new FrameLayout(mContext);
         
         // Connect in to the status bar manager service
@@ -292,7 +289,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void userSwitched(int newUserId) {
-        // should be overridden
+        StatusBarIconView.GlobalSettingsObserver.getInstance(mContext).onChange(true);
     }
 
     public boolean notificationIsForCurrentUser(StatusBarNotification n) {
@@ -1175,5 +1172,46 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean inKeyguardRestrictedInputMode() {
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
+    }
+
+    public int getExpandedDesktopMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        boolean expanded = Settings.System.getIntForUser(resolver,
+                Settings.System.EXPANDED_DESKTOP_STATE, 0, UserHandle.USER_CURRENT) == 1;
+        if (expanded) {
+            return Settings.System.getIntForUser(resolver,
+                    Settings.System.EXPANDED_DESKTOP_STYLE, 0, UserHandle.USER_CURRENT);
+        }
+        return 0;
+    }
+
+    public void addNavigationBarCallback(NavigationBarCallback callback) {
+        mNavigationCallbacks.add(callback);
+    }
+
+    protected void propagateNavigationIconHints(int hints) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setNavigationIconHints(hints);
+        }
+    }
+
+    protected void propagateMenuVisibility(boolean showMenu) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setMenuVisibility(showMenu);
+        }
+    }
+
+    protected void propagateDisabledFlags(int disabledFlags) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setDisabledFlags(disabledFlags);
+        }
+    }
+
+    // Pie Controls
+
+    public void updatePieTriggerMask(int newMask) {
+        if (mPieController != null) {
+            mPieController.updatePieTriggerMask(newMask);
+        }
     }
 }

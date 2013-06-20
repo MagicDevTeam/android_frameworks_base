@@ -25,6 +25,11 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.AlarmClock;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -57,13 +62,13 @@ public class Clock extends TextView {
     private SimpleDateFormat mClockFormat;
     private Locale mLocale;
     private SettingsObserver mObserver;
+    private boolean mHidden;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private int mAmPmStyle = AM_PM_STYLE_GONE;
-    private boolean mShowClock;
 
     Handler mHandler;
 
@@ -107,6 +112,11 @@ public class Clock extends TextView {
             setOnLongClickListener(this);
         }
         updateSettings();
+    }
+
+    public void setHidden(boolean hidden) {
+        mHidden = hidden;
+        updateVisibility();
     }
 
     @Override
@@ -243,6 +253,65 @@ public class Clock extends TextView {
  
         return result;
 
+    }
+
+    public void updateSettings() {
+        int amPmStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_AM_PM, 2, UserHandle.USER_CURRENT);
+
+        if (mAmPmStyle != amPmStyle) {
+            mAmPmStyle = amPmStyle;
+            mClockFormatString = "";
+
+            if (mAttached) {
+                updateClock();
+            }
+        }
+
+        updateVisibility();
+    }
+
+    private void updateVisibility() {
+        boolean showClock = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK, 1, UserHandle.USER_CURRENT) == 1;
+        setVisibility(showClock && !mHidden ? View.VISIBLE : View.GONE);
+    }
+
+    private void collapseStartActivity(Intent what) {
+        // collapse status bar
+        StatusBarManager statusBarManager = (StatusBarManager) getContext().getSystemService(
+                Context.STATUS_BAR_SERVICE);
+        statusBarManager.collapsePanels();
+
+        // dismiss keyguard in case it was active and no passcode set
+        try {
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+        } catch (Exception ex) {
+            // no action needed here
+        }
+
+        // start activity
+        what.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(what);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // start com.android.deskclock/.DeskClock
+        ComponentName clock = new ComponentName("com.android.deskclock",
+                "com.android.deskclock.DeskClock");
+        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+                .setComponent(clock);
+        collapseStartActivity(intent);
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM);
+        collapseStartActivity(intent);
+
+        // consume event
+        return true;
     }
 }
 

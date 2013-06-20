@@ -17,6 +17,10 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
@@ -253,6 +257,23 @@ public class SignalClusterView
 
         mMobileType.setVisibility(
                 !mWifiVisible ? View.VISIBLE : View.GONE);
+
+        updateSettings();
+    }
+
+    private void updateSignalClusterStyle() {
+        if (!mIsAirplaneMode) {
+            mMobileGroup.setVisibility(mSignalClusterStyle !=
+                    SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    public void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mSignalClusterStyle = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL,
+                UserHandle.USER_CURRENT);
+        updateSignalClusterStyle();
     }
 }
 

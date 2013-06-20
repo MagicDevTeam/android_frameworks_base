@@ -25,6 +25,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.util.Slog;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -224,5 +228,13 @@ public class BatteryController extends BroadcastReceiver {
                 cb.onBatteryLevelChanged(level, plugged);
             }
         }
+    }
+
+    public void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mBatteryStyle = (Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_BATTERY, BATTERY_STYLE_NORMAL,
+                UserHandle.USER_CURRENT));
+        updateBattery();
     }
 }
