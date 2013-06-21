@@ -2530,12 +2530,6 @@ public final class Settings {
         public static final String STATUS_BAR_SIGNAL_TEXT = "status_bar_signal";
 
         /**
-         * Torch state (flashlight)
-         * FIXME: move me to global state
-         * @hide
-         */
-        public static final String TORCH_STATE = "torch_state";
-        /**
          * Pointer speed setting.
          * This is an integer value in a range between -7 and +7, so there are 15 possible values.
          *   -7 = slowest

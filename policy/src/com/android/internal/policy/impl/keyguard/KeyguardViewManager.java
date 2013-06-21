@@ -41,6 +41,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
+import com.android.internal.util.cm.TorchConstants;
 import com.android.internal.widget.LockPatternUtils;
 
 /**
@@ -164,6 +165,96 @@ public class KeyguardViewManager {
             }
             return super.dispatchKeyEvent(event);
         }
+        return false;
+    }
+
+    public boolean handleKeyUp(int keyCode, KeyEvent event) {
+        if (mUnlockKeyDown) {
+            mUnlockKeyDown = false;
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    if (mKeyguardView.handleBackKey()) {
+                        return true;
+                    }
+                case KeyEvent.KEYCODE_HOME:
+                    if (mKeyguardView.handleHomeKey()) {
+                        return true;
+                    }
+                case KeyEvent.KEYCODE_MENU:
+                    if (mKeyguardView.handleMenuKey()) {
+                        return true;
+                    }
+            }
+        }
+        return false;
+    }
+
+    private static boolean runAction(Context context, String uri) {
+        if ("FLASHLIGHT".equals(uri)) {
+            context.sendBroadcast(new Intent(TorchConstants.ACTION_TOGGLE_STATE));
+            return true;
+        } else if ("NEXT".equals(uri)) {
+            sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_NEXT);
+            return true;
+        } else if ("PREVIOUS".equals(uri)) {
+            sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+            return true;
+        } else if ("PLAYPAUSE".equals(uri)) {
+            sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+            return true;
+        } else if ("SOUND".equals(uri)) {
+            toggleSilentMode(context);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void sendMediaButtonEvent(Context context, int code) {
+        long eventtime = SystemClock.uptimeMillis();
+
+        Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        KeyEvent downEvent = new KeyEvent(eventtime, eventtime, KeyEvent.ACTION_DOWN, code, 0);
+        downIntent.putExtra(Intent.EXTRA_KEY_EVENT, downEvent);
+        context.sendOrderedBroadcast(downIntent, null);
+
+        Intent upIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        KeyEvent upEvent = new KeyEvent(eventtime, eventtime, KeyEvent.ACTION_UP, code, 0);
+        upIntent.putExtra(Intent.EXTRA_KEY_EVENT, upEvent);
+        context.sendOrderedBroadcast(upIntent, null);
+    }
+
+    private static void toggleSilentMode(Context context) {
+        final AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        final Vibrator vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        final boolean hasVib = vib == null ? false : vib.hasVibrator();
+        if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            am.setRingerMode(hasVib
+                ? AudioManager.RINGER_MODE_VIBRATE
+                : AudioManager.RINGER_MODE_SILENT);
+        } else {
+            am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        }
+    }
+
+    private static long[] getLongPressVibePattern(Context context) {
+        if (Settings.System.getInt(context.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0) {
+            return null;
+        }
+
+        int[] defaultPattern = context.getResources().getIntArray(
+                com.android.internal.R.array.config_longPressVibePattern);
+        if (defaultPattern == null) {
+            return null;
+        }
+
+        long[] pattern = new long[defaultPattern.length];
+        for (int i = 0; i < defaultPattern.length; i++) {
+            pattern[i] = defaultPattern[i];
+        }
+
+        return pattern;
     }
 
     SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
