@@ -24,9 +24,8 @@ import android.app.IProfileManager;
 import android.app.NotificationGroup;
 import android.app.Profile;
 import android.app.ProfileGroup;
-
-import android.app.backup.BackupManager;
 import android.bluetooth.BluetoothAdapter;
+import android.app.backup.BackupManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -91,9 +90,6 @@ public class ProfileManagerService extends IProfileManager.Stub {
     private WifiManager mWifiManager;
     private String mLastConnectedSSID;
 
-    private WifiManager mWifiManager;
-    private String mLastConnectedSSID;
-
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -146,7 +142,8 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
     public ProfileManagerService(Context context) {
         mContext = context;
-        mWifiManager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+        mBackupManager = new BackupManager(mContext);
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mLastConnectedSSID = getActiveSSID();
 
         mWildcardGroup = new NotificationGroup(
