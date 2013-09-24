@@ -842,7 +842,6 @@ android_media_MediaPlayer_updateProxyConfig(
 
             if (exclusionList != NULL) {
                 thisplayer->updateProxyConfig(host, port, exclusionList);
-
                 env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
                 exclusionList = NULL;
             } else {
