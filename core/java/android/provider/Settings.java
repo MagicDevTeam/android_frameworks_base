@@ -2245,6 +2245,12 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
+         * Whether national data roaming should be used.
+         * @hide
+         */
+        public static final String MVNO_ROAMING = "mvno_roaming";
+        
+        /**
          * Show pointer location on screen?
          * 0 = no
          * 1 = yes
