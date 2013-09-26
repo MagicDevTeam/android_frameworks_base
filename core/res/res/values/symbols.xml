@@ -1841,33 +1841,21 @@
   <!-- From Chromium-WebView -->
   <java-symbol type="attr" name="actionModeWebSearchDrawable" />
   <java-symbol type="string" name="websearch" />
+  
 <!-- ===============================================================
-   Resources added in version 10 of CyanogenMod
+   Resources added in MagicMod jb4.3
    =============================================================== -->
   <eat-comment />
 
   <!-- Config.xml entries -->
-  <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
-  <java-symbol type="bool" name="config_hasRotationLockSwitch" />
-  <java-symbol type="integer" name="config_backKillTimeout" />
-  <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
-  <java-symbol type="integer" name="config_wallpaperMaxWidth" />
-  <java-symbol type="string" name="config_legacyUmsLunFile" />
-  <java-symbol type="bool" name="config_hasRemovableLid" />
 
   <!-- Telephony -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="array" name="config_telephony_set_audioparameters" />
-
-  <!-- Hardware Key ReMapping -->
-  <java-symbol type="integer" name="config_deviceHardwareKeys" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
-  <!-- Notification and battery light -->
-  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
-  <java-symbol type="bool" name="config_multiColorBatteryLed" />
-  <java-symbol type="array" name="notification_light_package_mapping" />
+
 
   <!-- Power menu -->
   <java-symbol type="string" name="global_actions" />
