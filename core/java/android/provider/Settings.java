@@ -2256,6 +2256,13 @@ public final class Settings {
          */
         public static final String ENABLE_MWI_NOTIFICATION = "enable_mwi_notification";
 
+         /**
+         * Whether noise suppression is enabled. The value is
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String NOISE_SUPPRESSION = "noise_suppression";
+
         /**
          * Show pointer location on screen?
          * 0 = no
@@ -2489,6 +2496,7 @@ public final class Settings {
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
             PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
             PHONE_BLACKLIST_REGEX_ENABLED,
+            NOISE_SUPPRESSION,
         };
 
         // Settings moved to Settings.Secure
