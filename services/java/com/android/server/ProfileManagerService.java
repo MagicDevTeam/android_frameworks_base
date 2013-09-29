@@ -20,11 +20,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.app.ActivityManagerNative;
 import android.app.IProfileManager;
 import android.app.NotificationGroup;
 import android.app.Profile;
 import android.app.ProfileGroup;
-import android.bluetooth.BluetoothAdapter;
 import android.app.ProfileManager;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
@@ -32,13 +32,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.XmlResourceParser;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiSsid;
-import android.net.wifi.WifiInfo;
 import android.os.Environment;
-import android.net.wifi.SupplicantState;
-
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.os.ParcelUuid;
@@ -92,6 +88,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 initialize();
             } else if (action.equals(Intent.ACTION_SHUTDOWN)) {
                 persistIfDirty();
+            }
         }
     };
 
