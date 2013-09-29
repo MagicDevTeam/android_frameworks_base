@@ -3788,6 +3788,7 @@ public final class Settings {
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             "lock_screen_owner_info_enabled";
 
+        /**
          * lock screen
          * @hide
          */
