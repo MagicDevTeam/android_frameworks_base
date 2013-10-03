@@ -17,12 +17,16 @@
 package com.android.internal.widget;
 
 import android.app.ActivityManagerNative;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -30,10 +34,13 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
+import android.provider.CalendarContract;
 import android.provider.Settings;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.View;
@@ -46,7 +53,10 @@ import com.google.android.collect.Lists;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Utilities for the lock pattern and its settings.
@@ -148,6 +158,7 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
+    private ProfileManager mProfileManager;
 
     // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
     private static volatile int sCurrentUserId = UserHandle.USER_NULL;
@@ -170,6 +181,7 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
     }
 
     private ILockSettings getLockSettings() {
@@ -1244,8 +1256,9 @@ public class LockPatternUtils {
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
-        final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
-                || isPassword && savedPasswordExists();
+        final boolean isProfileSecure = mProfileManager.getActiveProfile().getScreenLockModeWithDPM(mContext) == Profile.LockMode.DEFAULT;
+        final boolean secure = (isPattern && isLockPatternEnabled() && savedPatternExists()
+                || isPassword && savedPasswordExists()) && isProfileSecure;
         return secure;
     }
 
