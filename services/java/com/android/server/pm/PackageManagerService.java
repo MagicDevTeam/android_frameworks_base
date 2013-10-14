@@ -6343,6 +6343,105 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    private boolean isPermManagementEnabled() {
+        return (android.provider.Settings.Secure.getInt(
+                    mContext.getContentResolver(),
+                    android.provider.Settings.Secure.ENABLE_PERMISSIONS_MANAGEMENT,
+                    0) == 1);
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public String[] getRevokedPermissions(final String pkgName) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.REVOKE_PERMISSIONS, null);
+
+        String[] result = null;
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if (p != null && p.mExtras != null) {
+                final PackageSetting ps = (PackageSetting)p.mExtras;
+                if (ps.sharedUser != null) {
+                    result = new String[ps.sharedUser.revokedPermissions.size()];
+                    ps.sharedUser.revokedPermissions.toArray(result);
+                } else {
+                    result = new String[ps.revokedPermissions.size()];
+                    ps.revokedPermissions.toArray(result);
+                }
+            }
+        }
+        return result;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public void setRevokedPermissions(final String pkgName, final String[] perms) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.REVOKE_PERMISSIONS, null);
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if ((p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                if (p != null && p.mExtras != null) {
+                    final PackageSetting ps = (PackageSetting)p.mExtras;
+                    final GrantedPermissions gp = ps.sharedUser == null ? ps : ps.sharedUser;
+                    gp.revokedPermissions.clear();
+                    gp.revokedPermissions.addAll(Arrays.asList(perms));
+                    updateRevokedGids(gp);
+                    updateEffectivePermissions(gp);
+                    mSettings.writeLPr();
+                }
+            }
+        }
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public boolean isThemeCompatibilityModeEnabled(final String pkgName) {
+        boolean result = false;
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if (p != null && p.mExtras != null) {
+                final PackageSetting ps = (PackageSetting)p.mExtras;
+                if (ps.sharedUser != null) {
+                    result = ps.sharedUser.isThemeCompatibilityEnabled;
+                } else {
+                    result = ps.isThemeCompatibilityEnabled;
+                }
+            }
+        }
+        return result;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public void setThemeCompatibilityMode(final String pkgName, final boolean compatEnabled) {
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if (p != null && p.mExtras != null) {
+                final PackageSetting ps = (PackageSetting)p.mExtras;
+                if (ps.sharedUser != null) {
+                    ps.sharedUser.isThemeCompatibilityEnabled = compatEnabled;
+                } else {
+                    ps.isThemeCompatibilityEnabled = compatEnabled;
+                }
+                mSettings.writeLPr();
+            }
+        }
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    private static void updateEffectivePermissions(final GrantedPermissions gp) {
+        gp.effectivePermissions.clear();
+        gp.effectivePermissions.addAll(gp.grantedPermissions);
+        gp.effectivePermissions.removeAll(gp.revokedPermissions);
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    private void updateRevokedGids(final GrantedPermissions gp) {
+        gp.revokedGids = null;
+        for (String perm : gp.revokedPermissions) {
+            final BasePermission bp = mSettings.mPermissions.get(perm);
+            gp.revokedGids = appendInts(gp.revokedGids, bp.gids);
+        }
+    }
+
     /**
      * Get the verification agent timeout.
      *
