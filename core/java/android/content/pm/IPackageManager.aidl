@@ -399,4 +399,7 @@ interface IPackageManager {
 
     /** Reflects current DeviceStorageMonitorService state */
     boolean isStorageLow();
+
+    boolean isThemeCompatibilityModeEnabled(String packageName);
+    void setThemeCompatibilityMode(String packageName, boolean compatEnabled);
 }

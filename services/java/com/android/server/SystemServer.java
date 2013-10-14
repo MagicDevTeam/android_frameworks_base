@@ -155,6 +155,7 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
+        ThemeManagerService themeService = null;
 
         // Create a shared handler thread for UI within the system server.
         // This thread is used by at least the following components:
@@ -415,6 +416,14 @@ class ServerThread extends Thread {
                 } catch (Throwable e) {
                     reportWtf("starting Mount Service", e);
                 }
+            }
+
+            try {
+                Slog.i(TAG, "Theme Service");
+                themeService = new ThemeManagerService(context);
+                ServiceManager.addService("ThemeService", themeService);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting ThemeManagerService Service", e);
             }
 
             try {

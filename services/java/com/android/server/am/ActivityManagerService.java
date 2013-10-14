@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
 import com.android.internal.R;
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
 import com.android.server.AppOpsService;
@@ -37,6 +38,8 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -61,6 +64,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.app.ThemeHelper;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -1459,6 +1463,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
         ncl.start();
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public static final Context main(int factoryTest) {
         AThread thr = new AThread();
         thr.start();
@@ -4583,10 +4588,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
         mMainStack.activityDestroyed(token);
     }
     
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);
-            return r != null ? r.info.packageName : null;
+            return r != null && r.app != null ? r.info.packageName : Injector.getCallingUidPackage(this, token);
         }
     }
 
@@ -12709,6 +12715,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, AppOpsManager.OP_NONE, false, false, MY_PID,
                         Process.SYSTEM_UID, UserHandle.USER_ALL);
+
+                ThemeHelper.handleExtraConfigurationChanges(changes, newConfig, mContext, mHandler);
+
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -15069,5 +15078,37 @@ public final class ActivityManagerService  extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_CLASS)
+    static class Injector {
+
+        static String getCallingUidPackage(ActivityManagerService service, IBinder token) {
+            String s;
+            ActivityRecord r;
+            s = null;
+            r = service.mMainStack.isInStackLocked(token);
+            if(r == null)
+                return null;
+            
+            int callingUid = r.launchedFromUid;
+            if(callingUid > 0)
+                try {
+                    String packages[] = AppGlobals.getPackageManager().getPackagesForUid(callingUid);
+                    if(packages.length > 0)
+                        s = packages[0];
+                }
+                catch(RemoteException remoteexception) { }
+            return s;
+        }
+
+        static boolean isForegroudApp(ActivityManagerService service, ProcessRecord app, ProcessRecord TOP_APP) {
+            return !(app != TOP_APP && (app != service.mHomeProcess || 
+                android.provider.Settings.System.getInt(service.mContext.getContentResolver(), 
+                "keep_launcher_in_memory", 1) == 0));
+        }
+
+        Injector() {
+        }
     }
 }
