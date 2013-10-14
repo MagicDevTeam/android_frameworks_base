@@ -29,6 +29,8 @@ final class SharedUserSetting extends GrantedPermissions {
     // flags that are associated with this uid, regardless of any package flags
     int uidFlags;
 
+    boolean isThemeCompatibilityEnabled;
+
     final HashSet<PackageSetting> packages = new HashSet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();

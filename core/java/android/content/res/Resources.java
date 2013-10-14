@@ -21,8 +21,11 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.content.pm.ActivityInfo;
 import android.graphics.Movie;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable.ConstantState;
@@ -209,11 +212,12 @@ public class Resources {
      * the current screen (can not use dimension units, does not change based 
      * on orientation, etc). 
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public static Resources getSystem() {
         synchronized (sSync) {
             Resources ret = mSystem;
             if (ret == null) {
-                ret = new Resources();
+                ret = new CosResources();
                 mSystem = ret;
             }
 
@@ -1191,7 +1195,8 @@ public class Resources {
      * <p>You will normally use the {@link #obtainStyledAttributes} APIs to
      * retrieve XML attributes with style and theme information applied.
      */
-    public final class Theme {
+    @CosHook(CosHook.CosHookType.CHANGE_ACCESS)
+    public class Theme {
         /**
          * Place new attribute values into the theme.  The style resource
          * specified by <var>resid</var> will be retrieved from this Theme's
@@ -1469,7 +1474,8 @@ public class Resources {
      * 
      * @return Theme The newly created Theme container.
      */
-    public final Theme newTheme() {
+    @CosHook(CosHook.CosHookType.CHANGE_ACCESS)
+    public Theme newTheme() {
         return new Theme();
     }
 
@@ -1514,6 +1520,7 @@ public class Resources {
     /**
      * @hide
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public void updateConfiguration(Configuration config,
             DisplayMetrics metrics, CompatibilityInfo compat) {
         synchronized (mAccessLock) {
@@ -1555,7 +1562,7 @@ public class Resources {
                     mTmpConfig.setLayoutDirection(mTmpConfig.locale);
                 }
                 configChanges = mConfiguration.updateFrom(mTmpConfig);
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges) | 0x80000000 & configChanges;
             }
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
@@ -1651,6 +1658,15 @@ public class Resources {
                 }
             }
         }
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    static void clearPreloadedCache()
+    {
+        sPreloadedDrawables[0].clear();
+        sPreloadedDrawables[1].clear();
+        sPreloadedColorStateLists.clear();
+        sPreloadedColorDrawables.clear();
     }
 
     /**
@@ -2026,6 +2042,7 @@ public class Resources {
     static private final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
             ActivityInfo.CONFIG_LAYOUT_DIRECTION);
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
 
@@ -2107,7 +2124,8 @@ public class Resources {
                         InputStream is = mAssets.openNonAsset(
                                 value.assetCookie, file, AssetManager.ACCESS_STREAMING);
         //                System.out.println("Opened file " + file + ": " + is);
-                        dr = Drawable.createFromResourceStream(this, value, is,
+                        Injector.setDrawableId(id);
+                        dr = Injector.createFromResourceStream(this, value, is,
                                 file, null);
                         is.close();
         //                System.out.println("Created stream: " + dr);
@@ -2299,6 +2317,11 @@ public class Resources {
         return null;
     }
 
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    Drawable loadOverlayDrawable(TypedValue value, int id) {
+        return null;
+    }
+
     /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
             throws NotFoundException {
         synchronized (mAccessLock) {
@@ -2366,6 +2389,7 @@ public class Resources {
                 + Integer.toHexString(id));
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     private TypedArray getCachedStyledAttributes(int len) {
         synchronized (mAccessLock) {
             TypedArray attrs = mCachedStyledAttributes;
@@ -2394,13 +2418,14 @@ public class Resources {
                 }
                 mLastRetrievedAttrs = here;
             }
-            return new TypedArray(this,
+            return new CosTypedArray(this,
                     new int[len*AssetManager.STYLE_NUM_ENTRIES],
                     new int[1+len], len);
         }
     }
 
-    private Resources() {
+    @CosHook(CosHook.CosHookType.CHANGE_ACCESS)
+    public Resources() {
         mAssets = AssetManager.getSystem();
         // NOTE: Intentionally leaving this uninitialized (all values set
         // to zero), so that anyone who tries to do something that requires
@@ -2409,5 +2434,26 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
+    }
+
+
+    @CosHook(CosHook.CosHookType.NEW_CLASS)
+    static class Injector {
+        private static final boolean DBG = false;
+        private static final String TAG = "Resources.Injector";
+        private static int mId;
+
+        static Drawable createFromResourceStream(Resources res, TypedValue value, 
+                InputStream is, String srcName, BitmapFactory.Options opts) {
+            if (DBG) Log.d(TAG, String.format("createFromResourceStream: %s, %d", value.string, mId));
+            Drawable dr = res.loadOverlayDrawable(value, mId);
+            if (dr == null)
+                dr = Drawable.createFromResourceStream(res, value, is, srcName, opts);
+            return dr;
+        }
+
+        static void setDrawableId(int id) {
+            mId = id;
+        }
     }
 }

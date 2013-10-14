@@ -95,7 +95,7 @@
     <style name="TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textColor">@color/quick_settings_text_color</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:paddingStart">6dp</item>
         <item name="android:paddingEnd">6dp</item>
@@ -120,7 +120,7 @@
 
     <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">14dp</item>
-        <item name="android:textColor">#ff3a3b39</item>
+        <item name="android:textColor">@color/quick_settings_alarm_text_color</item>
     </style>
 
     <style name="TextAppearance.QuickSettings.CaCertWarning" parent="@style/TextAppearance.QuickSettings.TileView">
@@ -174,6 +174,13 @@
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/batterymeter_charge_color</item>
+    </style>
+
+    <!-- theme -->
+    <style name="TextAppearance.StatusBar.Date" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <item name="android:textSize">16dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
 </resources>

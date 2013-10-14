@@ -24,4 +24,41 @@
     <!-- Quick Settings -->
     <color name="qs_background_color">#FF212121</color>
     <color name="qs_background_pressed_color">#FF161616</color>
+
+    <!-- themes -->
+    <!--    <drawable name="intruder_bg_pressed">#ff33B5E5</drawable> -->
+
+    <!-- ==================== system bar only ==================== -->
+    <!-- <drawable name="system_bar_background">#ff000000</drawable> -->
+    
+    <!-- the darkening filter applied to notifications -->
+<!--    <drawable name="notification_icon_area_smoke">#aa000000</drawable>
+    <color name="notification_panel_scrim_color">#B0000000</color>-->
+
+    <!-- toggles button label -->
+<!--    <color name="toggles_button_label_off">#ffaaaaaa</color>
+    <color name="toggles_button_label_on">#ffffffff</color>-->
+
+    <!-- tabs text colors -->
+<!--    <color name="tab_selected_color">#ffffffff</color>
+    <color name="tab_deselected_color">#ff808080</color>-->
+
+    <!-- status bar clock color -->
+<!--    <color name="status_bar_clock_color">@android:color/holo_blue_light</color>-->
+
+    <!-- extended status bar clock color -->
+<!--    <color name="status_bar_extended_clock_default_color">#ffffff</color>
+    <color name="status_bar_extended_clock_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_clock_focused_color">@android:color/holo_blue_light</color> -->
+
+    <!-- extended status bar date color -->
+<!--    <color name="status_bar_extended_date_default_color">#cccccc</color>
+    <color name="status_bar_extended_date_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_date_focused_color">@android:color/holo_blue_light</color>-->
+
+    <!-- quick settings text color -->
+   <color name="quick_settings_text_color">#cccccc</color>
+   <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
+<!--    <color name="quick_settings_clock_text_color">#ff33b5e5</color>-->
+
 </resources>
