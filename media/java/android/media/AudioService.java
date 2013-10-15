@@ -74,7 +74,6 @@ import android.view.Surface;
 import android.view.VolumePanel;
 import android.view.WindowManager;
 
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
 
@@ -124,8 +123,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** The UI */
     private VolumePanel mVolumePanel;
-    private Context mUiContext;
-    private Handler mHandler;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -462,7 +459,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mHandler = new Handler();
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
@@ -562,13 +558,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         pkgFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         pkgFilter.addDataScheme("package");
         context.registerReceiver(mReceiver, pkgFilter);
-
-        ThemeUtils.registerThemeChangeReceiver(context, new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                mUiContext = null;
-            }
-        });
 
         // Register for phone state monitoring
         TelephonyManager tmgr = (TelephonyManager)
@@ -1151,7 +1140,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
-        showVolumeChangeUi(streamType, flags);
+        mVolumePanel.postVolumeChanged(streamType, flags);
 
         if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
             oldIndex = (oldIndex + 5) / 10;
@@ -1166,7 +1155,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
-        masterVolumeChanged(flags);
+        mVolumePanel.postMasterVolumeChanged(flags);
 
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
@@ -1176,7 +1165,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        masterMuteChanged(flags);
+        mVolumePanel.postMasterMuteChanged(flags);
         broadcastMasterMuteStatus(muted);
     }
 
@@ -2424,7 +2413,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true);
                             mMusicActiveMs = 0;
-                            displaySafeVolumeWarning();
                         }
                     }
                 }
@@ -4181,139 +4169,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             }
-        }
-    }
-
-    private void masterVolumeChanged(final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postMasterVolumeChanged(flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postMasterVolumeChanged(flags);
-                }
-            });
-        }
-    }
-
-    private void masterMuteChanged(final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postMasterMuteChanged(flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postMasterMuteChanged(flags);
-                }
-            });
-        }
-    }
-
-    private void remoteSliderVisibility(final boolean hasRemotePlayback) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
-                }
-            });
-        }
-    }
-
-    private void showVolumeChangeUi(final int streamType, final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postVolumeChanged(streamType, flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postVolumeChanged(streamType, flags);
-                }
-            });
-        }
-    }
-
-    private void remoteVolumeChanged(final int streamType, final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postRemoteVolumeChanged(streamType, flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postRemoteVolumeChanged(streamType, flags);
-                }
-            });
-        }
-    }
-
-    private void displaySafeVolumeWarning() {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postDisplaySafeVolumeWarning(0);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postDisplaySafeVolumeWarning(0);
-                }
-            });
-        }
-    }
-
-    private void hasNewRemotePlaybackInfo() {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postHasNewRemotePlaybackInfo();
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postHasNewRemotePlaybackInfo();
-                }
-            });
         }
     }
 
@@ -6393,7 +6248,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         // fire up the UI
-        remoteVolumeChanged(streamType, flags);
+        mVolumePanel.postRemoteVolumeChanged(streamType, flags);
     }
 
     private void sendVolumeUpdateToRemote(int rccId, int direction) {
@@ -6513,7 +6368,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized (mMainRemote) {
             if (mHasRemotePlayback != hasRemotePlayback) {
                 mHasRemotePlayback = hasRemotePlayback;
-                remoteSliderVisibility(hasRemotePlayback);
+                mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
             }
         }
     }
@@ -6763,7 +6618,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
                     (index > mSafeMediaVolumeIndex)) {
-                displaySafeVolumeWarning();
                 return false;
             }
             return true;

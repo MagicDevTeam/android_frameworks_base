@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
- * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +22,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -777,11 +775,14 @@ class ServerThread extends Thread {
                 }
             }
 
-            try {
-                Slog.i(TAG, "AssetRedirectionManager Service");
-                ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableIrdaManagerService)) {
+                try {
+                    Slog.i(TAG, "IrdaManager Service");
+                    ServiceManager.addService("irda", new IrdaManagerService(context));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Irda Service", e);
+                }
             }
 
             if (context.getResources().getBoolean(
@@ -882,15 +883,6 @@ class ServerThread extends Thread {
         } catch (Throwable e) {
             reportWtf("making Display Manager Service ready", e);
         }
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE);
-        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE_RESET);
-        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addCategory(Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE);
-        filter.addDataScheme("package");
-        context.registerReceiver(new AppsLaunchFailureReceiver(), filter);
 
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
