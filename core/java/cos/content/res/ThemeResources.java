@@ -80,7 +80,7 @@ public class ThemeResources {
 
     static {
         sMiuiToChaosPackageMappings = new HashMap();
-        sMiuiToChaosPackageMappings.put("framework-res", "framework-miui-res");
+        sMiuiToChaosPackageMappings.put("framework-res", "com.android.systemui");
         sMiuiToChaosPackageMappings.put("android", "com.android.systemui");
         sMiuiToChaosPackageMappings.put("com.android.contacts", "com.android.phone");
         sMiuiToChaosPackageMappings.put("com.android.mms", "framework-miui-res");
