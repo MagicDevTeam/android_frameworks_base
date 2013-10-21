@@ -33,7 +33,7 @@ import cos.util.ImageUtils;
 import cos.util.InputStreamLoader;
 
 public class ThemeResources {
-    public static final boolean DEBUG_THEMES = true;
+    public static final boolean DEBUG_THEMES = false;
     private static final boolean DBG = DEBUG_THEMES;
     private static final String TAG = "ThemeResources";
 
