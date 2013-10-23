@@ -4234,4 +4234,8 @@
     <string name="toast_rotation_unlocked">Display rotation unlocked</string>
     <string name="toast_rotation_locked">Display rotation locked</string>
     
+    <!-- Notification for Expanded desktop default -->
+    <string name="expanded_mode_default_set">Expanded desktop set to hide statusbar only. Configure in Power menu settings</string>
+    <string name="expanded_mode_default_with_navbar_set">Expanded desktop set to hide status and navigation bar. Configure in Power menu settings</string>
+    
 </resources>
