@@ -1926,5 +1926,11 @@
   <!-- HW rotation lock -->
   <java-symbol type="string" name="toast_rotation_unlocked" />
   <java-symbol type="string" name="toast_rotation_locked" />
-
+  
+  <!-- Hardware Key ReMapping -->
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+  
+  <java-symbol type="anim" name="shrink_fade_out_center" />
+  <java-symbol type="anim" name="grow_fade_in_center" />
+  <java-symbol type="string" name="expanded_mode_default_set" />
 </resources>

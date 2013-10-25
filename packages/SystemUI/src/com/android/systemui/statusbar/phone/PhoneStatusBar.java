@@ -832,6 +832,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void toggleStatusBar(boolean enable) {
+    }
+	
+    @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
         mSearchPanelView.setStatusBarView(mNavigationBarView);
