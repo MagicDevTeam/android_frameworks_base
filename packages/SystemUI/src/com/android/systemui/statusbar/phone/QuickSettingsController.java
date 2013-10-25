@@ -57,9 +57,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
 import com.android.internal.util.cm.QSUtils;
 import com.android.systemui.quicksettings.AirplaneModeTile;
@@ -74,6 +74,7 @@ import com.android.systemui.quicksettings.DockBatteryTile;
 import com.android.systemui.quicksettings.ExpandedDesktopTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
+import com.android.systemui.quicksettings.LteTile;
 import com.android.systemui.quicksettings.MobileNetworkTile;
 import com.android.systemui.quicksettings.MobileNetworkTypeTile;
 import com.android.systemui.quicksettings.NetworkAdbTile;
@@ -115,15 +116,16 @@ public class QuickSettingsController {
     private final Context mContext;
     private ArrayList<QuickSettingsTile> mQuickSettingsTiles;
     public PanelBar mBar;
-    private final ViewGroup mContainerView;
+    private final QuickSettingsContainerView mContainerView;
     private final Handler mHandler;
     private BroadcastReceiver mReceiver;
     private ContentObserver mObserver;
     public PhoneStatusBar mStatusBarService;
     private final String mSettingsString;
     private boolean mHideLiveTiles;
+    private boolean mHideLiveTileLabels;
 
-    private InputMethodTile IMETile;
+    private InputMethodTile mIMETile;
 
     private static final int MSG_UPDATE_TILES = 1000;
 
@@ -148,12 +150,16 @@ public class QuickSettingsController {
     }
 
     void loadTiles() {
+        // Reset reference tiles
+        mIMETile = null;
 
         // Filter items not compatible with device
         boolean cameraSupported = QSUtils.deviceSupportsCamera();
         boolean bluetoothSupported = QSUtils.deviceSupportsBluetooth();
         boolean mobileDataSupported = QSUtils.deviceSupportsMobileData(mContext);
         boolean lteSupported = QSUtils.deviceSupportsLte(mContext);
+        boolean gpsSupported = QSUtils.deviceSupportsGps(mContext);
+        boolean torchSupported = QSUtils.deviceSupportsTorch(mContext);
 
         if (!bluetoothSupported) {
             TILES_DEFAULT.remove(TILE_BLUETOOTH);
@@ -165,6 +171,18 @@ public class QuickSettingsController {
             TILES_DEFAULT.remove(TILE_NETWORKMODE);
         }
 
+        if (!lteSupported) {
+            TILES_DEFAULT.remove(TILE_LTE);
+        }
+
+        if (!gpsSupported) {
+            TILES_DEFAULT.remove(TILE_GPS);
+        }
+
+        if (!torchSupported) {
+            TILES_DEFAULT.remove(TILE_TORCH);
+        }
+
         // Read the stored list of tiles
         ContentResolver resolver = mContext.getContentResolver();
         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -172,7 +190,7 @@ public class QuickSettingsController {
                 mSettingsString, UserHandle.USER_CURRENT);
         if (tiles == null) {
             Log.i(TAG, "Default tiles being loaded");
-            tiles = TILES_DEFAULT;
+            tiles = TextUtils.join(TILE_DELIMITER, TILES_DEFAULT);
         }
 
         Log.i(TAG, "Tiles list: " + tiles);
@@ -340,6 +358,11 @@ public class QuickSettingsController {
         loadTiles();
         setupBroadcastReceiver();
         setupContentObserver();
+        if (mHideLiveTileLabels) {
+            for (QuickSettingsTile t : mQuickSettingsTiles) {
+                t.setLabelVisibility(false);
+            }
+        }
     }
 
     void setupContentObserver() {
@@ -364,8 +387,10 @@ public class QuickSettingsController {
                 mHandler.sendEmptyMessage(MSG_UPDATE_TILES);
             } else {
                 ContentResolver resolver = mContext.getContentResolver();
-                for (QuickSettingsTile tile : mObserverMap.get(uri)) {
-                    tile.onChangeUri(resolver, uri);
+                if (mObserverMap != null && mObserverMap.get(uri) != null) {
+                    for (QuickSettingsTile tile : mObserverMap.get(uri)) {
+                        tile.onChangeUri(resolver, uri);
+                    }
                 }
             }
         }
@@ -421,8 +446,8 @@ public class QuickSettingsController {
     }
 
     public void setImeWindowStatus(boolean visible) {
-        if (IMETile != null) {
-            IMETile.toggleVisibility(visible);
+        if (mIMETile != null) {
+            mIMETile.toggleVisibility(visible);
         }
     }
 
@@ -433,10 +458,8 @@ public class QuickSettingsController {
         }
     }
 
-    public void setTileTitleVisibility(boolean visible) {
-        for (QuickSettingsTile t : mQuickSettingsTiles) {
-            t.setLabelVisibility(visible);
-        }
+    public void hideLiveTileLabels(boolean hide) {
+        mHideLiveTileLabels = hide;
     }
 
     public void hideLiveTiles(boolean hide) {

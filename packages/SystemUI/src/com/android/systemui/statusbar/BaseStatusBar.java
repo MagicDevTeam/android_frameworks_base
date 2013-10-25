@@ -83,6 +83,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.HapticFeedbackConstants;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -329,7 +330,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void userSwitched(int newUserId) {
-        StatusBarIconView.GlobalSettingsObserver.getInstance(mContext).onChange(true);
+        // should be overridden
     }
 
     public boolean notificationIsForCurrentUser(StatusBarNotification n) {
@@ -1289,14 +1290,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             callback.setDisabledFlags(disabledFlags);
         }
     }
-
-    // Pie Controls
-
-    public void updatePieTriggerMask(int newMask) {
-        if (mPieController != null) {
-            mPieController.updatePieTriggerMask(newMask);
-        }
-    }
+    
+    private ArrayList<NavigationBarCallback> mNavigationCallbacks =
+            new ArrayList<NavigationBarCallback>();
 
     Runnable mKillTask = new Runnable() {
         public void run() {

@@ -133,12 +133,14 @@ public class QuickSettingsContainerView extends FrameLayout {
         }
 
         for (int i = 0; i < N; ++i) {
-            QuickSettingsTileView v = (QuickSettingsTileView) getChildAt(i);
-            ViewGroup.LayoutParams lp = v.getLayoutParams();
-            if (v.getVisibility() != GONE) {
+            QuickSettingsTileView child = (QuickSettingsTileView) getChildAt(i);
+            ViewGroup.LayoutParams lp = child.getLayoutParams();
+            if (child.getVisibility() != GONE) {
                 int col = cursor % mNumColumns;
-                int colSpan = v.getColumnSpan();
+                int colSpan = child.getColumnSpan();
                 int row = cursor / mNumColumns;
+                final int childWidth = lp.width;
+                final int childHeight = lp.height;                
 
                 // Push the item to the next row if it can't fit on this one
                 if ((col + colSpan) > mNumColumns && !mSingleRow) {

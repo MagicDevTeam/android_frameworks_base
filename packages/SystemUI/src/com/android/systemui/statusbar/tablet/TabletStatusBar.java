@@ -71,8 +71,6 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CircleBattery;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -161,9 +159,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     DoNotDisturb mDoNotDisturb;
 
     ViewGroup mBarContents;
-
-    SignalClusterView mSignalView;
-    Clock mClock;
 
     // hide system chrome ("lights out") support
     View mShadow;
@@ -544,19 +539,13 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
-
-        final CircleBattery circleBattery =
-                (CircleBattery) sb.findViewById(R.id.circle_battery);
-        mBatteryController.addStateChangedCallback(circleBattery);
-
         mBluetoothController = new BluetoothController(mContext);
         mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
 
         mNetworkController = new NetworkController(mContext);
-        mSignalView = (SignalClusterView) sb.findViewById(R.id.signal_cluster);
-        mNetworkController.addSignalCluster(mSignalView);
-
-        mClock = (Clock) sb.findViewById(R.id.clock);
+        final SignalClusterView signalCluster =
+                (SignalClusterView)sb.findViewById(R.id.signal_cluster);
+        mNetworkController.addSignalCluster(signalCluster);
 
         // The navigation buttons
         mBackButton = (ImageView)sb.findViewById(R.id.back);
@@ -623,10 +612,10 @@ public class TabletStatusBar extends BaseStatusBar implements
         // tuning parameters
         final int LIGHTS_GOING_OUT_SYSBAR_DURATION = 750;
         final int LIGHTS_GOING_OUT_SHADOW_DURATION = 750;
-        final int LIGHTS_GOING_OUT_SHADOW_DELAY    = 0;
+        final int LIGHTS_GOING_OUT_SHADOW_DELAY = 0;
 
         final int LIGHTS_COMING_UP_SYSBAR_DURATION = 200;
-//        final int LIGHTS_COMING_UP_SYSBAR_DELAY    = 50;
+// final int LIGHTS_COMING_UP_SYSBAR_DELAY = 50;
         final int LIGHTS_COMING_UP_SHADOW_DURATION = 0;
 
         LayoutTransition xition = new LayoutTransition();
@@ -941,12 +930,13 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void showClock(boolean show) {
-        if (mClock != null) {
-            mClock.setHidden(!show);
+        View clock = mBarContents.findViewById(R.id.clock);
+        View network_text = mBarContents.findViewById(R.id.network_text);
+        if (clock != null) {
+            clock.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-        View networkText = mBarContents.findViewById(R.id.network_text);
-        if (networkText != null) {
-            networkText.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (network_text != null) {
+            network_text.setVisibility((!show) ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -1597,20 +1587,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected boolean shouldDisableNavbarGestures() {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
-    }
-
-    @Override
-    public void userSwitched(int newUserId) {
-        if (mSignalView != null) {
-            mSignalView.updateSettings();
-        }
-        if (mClock != null) {
-            mClock.updateSettings();
-        }
-        if (mBatteryController != null) {
-            mBatteryController.updateSettings();
-        }
-        super.userSwitched(newUserId);
     }
 }
 

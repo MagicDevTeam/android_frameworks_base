@@ -32,12 +32,8 @@ import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
-import android.database.ContentObserver;
-
-import android.os.Handler;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
 
@@ -64,8 +60,6 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setColor(res.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
         mNotification = notification;
-        mShowNotificationCount = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.STATUS_BAR_NOTIF_COUNT, 0, UserHandle.USER_CURRENT) == 1;
         setContentDescription(notification);
 
         // We do not resize and scale system icons (on the right), only notification icons (on the
@@ -299,57 +293,5 @@ public class StatusBarIconView extends AnimatedImageView {
     public String toString() {
         return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon 
             + " notification=" + mNotification + ")";
-    }
-
-    static class GlobalSettingsObserver extends ContentObserver {
-        private static GlobalSettingsObserver sInstance;
-        private ArrayList<StatusBarIconView> mIconViews = new ArrayList<StatusBarIconView> ();
-        private Context mContext;
-
-        GlobalSettingsObserver(Handler handler, Context context) {
-            super(handler);
-            mContext = context.getApplicationContext();
-        }
-
-        static GlobalSettingsObserver getInstance(Context context) {
-            if (sInstance == null) {
-                sInstance = new GlobalSettingsObserver(new Handler(), context);
-            }
-            return sInstance;
-        }
-
-        void attach(StatusBarIconView sbiv) {
-            if (mIconViews.isEmpty()) {
-                observe();
-            }
-            mIconViews.add(sbiv);
-        }
-
-        void detach(StatusBarIconView sbiv) {
-            mIconViews.remove(sbiv);
-            if (mIconViews.isEmpty()) {
-                unobserve();
-            }
-        }
-
-        void observe() {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.STATUS_BAR_NOTIF_COUNT),
-                    false, this);
-        }
-
-        void unobserve() {
-            mContext.getContentResolver().unregisterContentObserver(this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            boolean showIconCount = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STATUS_BAR_NOTIF_COUNT, 0, UserHandle.USER_CURRENT) == 1;
-            for (StatusBarIconView sbiv : mIconViews) {
-                sbiv.mShowNotificationCount = showIconCount;
-                sbiv.set(sbiv.mIcon, true);
-            }
-        }
     }
 }

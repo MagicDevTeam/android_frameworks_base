@@ -1247,5 +1247,8 @@
     <bool name="config_enableIrdaManagerService">false</bool>
     
     <!-- Dock battery compatibility (disabled by default) -->
-    <bool name="config_hasDockBattery">false</bool>    
+    <bool name="config_hasDockBattery">false</bool>
+
+    <!-- Device supports LED flashlight -->
+    <bool name="config_enableTorch">false</bool>     
 </resources>

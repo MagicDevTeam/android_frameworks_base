@@ -1933,4 +1933,6 @@
   <java-symbol type="anim" name="shrink_fade_out_center" />
   <java-symbol type="anim" name="grow_fade_in_center" />
   <java-symbol type="string" name="expanded_mode_default_set" />
+  <!-- LED flashlight -->
+  <java-symbol type="bool" name="config_enableTorch" />   
 </resources>
