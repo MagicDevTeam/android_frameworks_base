@@ -32,8 +32,12 @@ import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
+import android.database.ContentObserver;
+
+import android.os.Handler;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
 

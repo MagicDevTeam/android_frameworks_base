@@ -1804,6 +1804,28 @@ public final class Settings {
         public static final String ELECTRON_BEAM_ANIMATION_OFF = "electron_beam_animation_off";
 
         /**
+	 * The keyboard brightness to be used while the screen is on.
+	 * Valid value range is between 0 and {@link PowerManager#getMaximumKeyboardBrightness()}
+	 * @hide
+	 */
+        public static final String KEYBOARD_BRIGHTNESS = "keyboard_brightness";
+
+        /**
+	 * The button brightness to be used while the screen is on or after a button press,
+	 * depending on the value of {@link BUTTON_BACKLIGHT_TIMEOUT}.
+	 * Valid value range is between 0 and {@link PowerManager#getMaximumButtonBrightness()}
+	 * @hide
+	 */
+        public static final String BUTTON_BRIGHTNESS = "button_brightness";
+
+        /**
+	 * The time in ms to keep the button backlight on after pressing a button.
+	 * A value of 0 will keep the buttons on for as long as the screen is on.
+	 * @hide
+	 */
+        public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
+        
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated Use {@link Global#SHOW_PROCESSES} instead
@@ -2460,13 +2482,6 @@ public final class Settings {
          * @hide
          */
         public static final String LTE_MODE = "lte_mode";
- 
- 
-         /**
-        * AutoHide CombinedBar on tablets.
-        * @hide
-        */
-        public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
 
         /**
          * Display style of AM/PM next to clock in status bar
@@ -2661,61 +2676,6 @@ public final class Settings {
         public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
 
         /**
-         * Display style of AM/PM next to clock in status bar
-         * 0: Normal display (Eclair stock)
-         * 1: Small display (Froyo stock)
-         * 2: No display (Gingerbread/ICS stock)
-         * default: 2
-         * @hide
-         */
-        public static final String STATUS_BAR_AM_PM = "status_bar_am_pm";
-
-        /**
-         * Display style of the status bar battery information
-         * 0: Display the stock battery information
-         * 1: Display cm battery percentage implementation / dont show stock icon
-         * 2: Display cm circle battery implementation without percentage
-         * 3: Display cm circle battery implementation with percentage
-         * 4: Hide the battery information
-         * default: 0
-         * @hide
-         */
-        public static final String STATUS_BAR_BATTERY = "status_bar_battery";
-
-        /**
-         * Whether to show the clock in status bar
-         * of the stock battery icon
-         * 0: don't show the clock
-         * 1: show the clock
-         * default: 1
-         * @hide
-         */
-        public static final String STATUS_BAR_CLOCK = "status_bar_clock";
-
-        /**
-         * Whether to show the signal text or signal bars.
-         * default: 0
-         * 0: show signal bars
-         * 1: show signal text numbers
-         * 2: show signal text numbers w/small dBm appended
-         * @hide
-         */
-        public static final String STATUS_BAR_SIGNAL_TEXT = "status_bar_signal";
-
-         /**
-         * Whether to control brightness from status bar
-         *
-         * @hide
-         */
-        public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
-
-        /**
-         * Whether to show the IME switcher in the status bar
-         * @hide
-         */
-        public static final String STATUS_BAR_IME_SWITCHER = "status_bar_ime_switcher";
-
-        /**
          * Whether to collapse the notification area after dismissing the last notification
          * @hide
          */
@@ -2739,27 +2699,6 @@ public final class Settings {
          * @hide
          */
         public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
-
-        /**
-         * Whether to use a separate delay for "slide to unlock" and security
-         * lock
-         * @hide
-         */
-        public static final String SCREEN_LOCK_SLIDE_DELAY_TOGGLE = "screen_lock_slide_delay_toggle";
-
-        /**
-         * How many ms to delay before enabling the "slide to unlock" screen
-         * lock when the screen goes off due to timeout
-         * @hide
-         */
-        public static final String SCREEN_LOCK_SLIDE_TIMEOUT_DELAY = "screen_lock_slide_timeout_delay";
-
-        /**
-         * How many ms to delay before enabling the "slide to unlock" screen
-         * lock when the screen is turned off by the user
-         * @hide
-         */
-        public static final String SCREEN_LOCK_SLIDE_SCREENOFF_DELAY = "screen_lock_slide_screenoff_delay";
 
         /**
          * Whether to use the custom quick unlock screen control
@@ -2916,12 +2855,6 @@ public final class Settings {
         @Deprecated
         public static final String POWER_SOUNDS_ENABLED = Global.POWER_SOUNDS_ENABLED;
 
-         /**
-         * Statusbar State
-         * @hide
-         */
-        public static final String EXPANDED_DESKTOP_STATE = "expanded_desktop_state";
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DOCK_SOUNDS_ENABLED}
          * instead
@@ -3059,7 +2992,26 @@ public final class Settings {
          * @hide
          */
         public static final String POWER_MENU_SOUND_ENABLED = "power_menu_silent_enabled";
+        
+        /**
+	 * Whether to unlock the screen with the home key. The value is boolean (1 or 0).
+	 * @hide
+	 */
+        public static final String HOME_UNLOCK_SCREEN = "home_unlock_screen";        
+        
+        /**
+	 * Whether the lockscreen vibrate should be enabled.
+	 * @hide
+	 */
+	public static final String LOCKSCREEN_VIBRATE_ENABLED = "lockscreen.vibrate_enabled";
 
+	/**
+	 * Show the pending notification counts as overlays on the status bar
+	 * Whether to enable custom rebindings of the actions performed on
+	 * certain key press events.
+	 * @hide
+	 */
+        public static final String HARDWARE_KEY_REBINDING = "hardware_key_rebinding";
 
          /**
           * Action to perform when the home key is long-pressed. (Default is 2)

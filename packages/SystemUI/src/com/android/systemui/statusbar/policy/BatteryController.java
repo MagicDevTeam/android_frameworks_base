@@ -31,6 +31,10 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.database.ContentObserver;
+
+
+import com.android.systemui.settings.ToggleSlider;
 
 import com.android.systemui.R;
 
@@ -187,7 +191,8 @@ public class BatteryController extends BroadcastReceiver {
         }
     }
 
-    protected void updateViews(int level) {
+    protected void updateViews() {
+        int level = getBatteryLevel();
         if (mUiController) {
             int N = mIconViews.size();
             for (int i=0; i<N; i++) {
@@ -199,8 +204,7 @@ public class BatteryController extends BroadcastReceiver {
             N = mLabelViews.size();
             for (int i=0; i<N; i++) {
                 TextView v = mLabelViews.get(i);
-                v.setText(mContext.getString(BATTERY_TEXT_STYLE_MIN,
-                        level));
+                v.setText(mContext.getString(BATTERY_TEXT_STYLE_MIN, level));
             }
         }
 
@@ -209,24 +213,39 @@ public class BatteryController extends BroadcastReceiver {
         }
     }
 
-            int N = mIconViews.size();
-            for (int i=0; i<N; i++) {
-                ImageView v = mIconViews.get(i);
-                v.setImageResource(icon);
-                v.setImageLevel(level);
-                v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
-                        level));
-            }
-            N = mLabelViews.size();
-            for (int i=0; i<N; i++) {
-                TextView v = mLabelViews.get(i);
-                v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
-                        level));
-            }
+    protected void updateBattery() {
+        int mIcon = View.GONE;
+        int mText = View.GONE;
+        int mIconStyle = getIconStyleNormal();
 
-            for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-                cb.onBatteryLevelChanged(level, plugged);
+        if (isBatteryPresent()) {
+            if ( isBatteryStatusUnknown() &&
+                (mBatteryStyle == BATTERY_STYLE_NORMAL || mBatteryStyle == BATTERY_STYLE_PERCENT)) {
+                // Unknown status doesn't relies on any style
+                mIcon = (View.VISIBLE);
+                mIconStyle = getIconStyleUnknown();
+            } else if (mBatteryStyle == BATTERY_STYLE_NORMAL) {
+                mIcon = (View.VISIBLE);
+                mIconStyle = isBatteryStatusCharging() ?
+                                getIconStyleCharge() : getIconStyleNormal();
+            } else if (mBatteryStyle == BATTERY_STYLE_PERCENT) {
+                mIcon = (View.VISIBLE);
+                mText = (View.VISIBLE);
+                mIconStyle = isBatteryStatusCharging() ?
+                                getIconStyleChargeMin() : getIconStyleNormalMin();
             }
+        }
+
+        int N = mIconViews.size();
+        for (int i=0; i<N; i++) {
+            ImageView v = mIconViews.get(i);
+            v.setVisibility(mIcon);
+            v.setImageResource(mIconStyle);
+        }
+        N = mLabelViews.size();
+        for (int i=0; i<N; i++) {
+            TextView v = mLabelViews.get(i);
+            v.setVisibility(mText);
         }
     }
 

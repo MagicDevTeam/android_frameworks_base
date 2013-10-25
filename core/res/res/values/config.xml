@@ -1243,4 +1243,7 @@
 
     <!-- True if the Irda service should be started at system start -->
     <bool name="config_enableIrdaManagerService">false</bool>
+    
+    <!-- Dock battery compatibility (disabled by default) -->
+    <bool name="config_hasDockBattery">false</bool>    
 </resources>

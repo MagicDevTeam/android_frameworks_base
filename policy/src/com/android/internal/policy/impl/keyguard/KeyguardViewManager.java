@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -39,6 +40,10 @@ import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.os.SystemClock;
+import android.media.AudioManager;
+import android.os.Vibrator;
+import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.internal.util.cm.TorchConstants;
@@ -71,6 +76,8 @@ public class KeyguardViewManager {
 
     private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
+    
+    private boolean mUnlockKeyDown = false;
 
     public interface ShowListener {
         void onShown(IBinder windowToken);
@@ -165,7 +172,6 @@ public class KeyguardViewManager {
             }
             return super.dispatchKeyEvent(event);
         }
-        return false;
     }
 
     public boolean handleKeyUp(int keyCode, KeyEvent event) {

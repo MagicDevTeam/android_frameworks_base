@@ -194,6 +194,24 @@ public class ProfileManagerService extends IProfileManager.Stub {
         Log.d(TAG, "Set active profile to: " + newActiveProfile.getUuid().toString()
                 + " - " + newActiveProfile.getName());
 
+        Profile lastProfile = mActiveProfile;
+        mActiveProfile = newActiveProfile;
+        mDirty = true;
+
+        if (doInit) {
+            if (LOCAL_LOGV) Log.v(TAG, "setActiveProfile(Profile, boolean) - Running init");
+
+            /*
+	     * We need to clear the caller's identity in order to
+	     * - allow the profile switch to execute actions
+	     * not included in the caller's permissions
+	     * - broadcast INTENT_ACTION_PROFILE_SELECTED
+	     */
+            long token = clearCallingIdentity();
+
+            // Call profile's "doSelect"
+            mActiveProfile.doSelect(mContext);                
+
                 // Notify other applications of newly selected profile.
                 Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
                 broadcast.putExtra("name", mActiveProfile.getName());
@@ -213,11 +231,6 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
                 restoreCallingIdentity(token);
             }
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
     }
 
     @Override

@@ -86,9 +86,7 @@ import android.widget.TextView;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.pie.PiePosition;
 import com.android.systemui.EventLogTags;
-import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -285,7 +283,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private Animator mLightsOnAnimation;
     // last theme that was applied in order to detect theme change (as opposed
     // to some other configuration change).
-    CustomTheme mCurrentTheme;
     private boolean mRecreating = false;
 
     // for disabling the status bar

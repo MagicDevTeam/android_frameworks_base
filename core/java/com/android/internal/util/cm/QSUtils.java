@@ -7,11 +7,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.Camera;
 import android.hardware.display.DisplayManager;
+import android.telephony.TelephonyManager;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.os.UserHandle;
 import android.provider.Settings;
+import com.android.internal.telephony.PhoneConstants;
 
 public class QSUtils {
         public static boolean deviceSupportsUsbTether(Context ctx) {
