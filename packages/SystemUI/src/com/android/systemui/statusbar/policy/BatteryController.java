@@ -39,9 +39,12 @@ public class BatteryController extends BroadcastReceiver {
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
+    int level = 0;
+    int status = 0;
+    boolean plugged = false;
 
     public interface BatteryStateChangeCallback {
-        public void onBatteryLevelChanged(int level, boolean pluggedIn);
+        public void onBatteryLevelChanged(int level, int status);
     }
 
     public BatteryController(Context context) {
@@ -64,14 +67,35 @@ public class BatteryController extends BroadcastReceiver {
         mChangeCallbacks.add(cb);
     }
 
+    public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
+        mChangeCallbacks.remove(cb);
+    }    
+    
+    protected int getBatteryLevel() {
+        return level;
+    }    
+
+    protected int getBatteryStatus() {
+        return status;
+    } 
+ 
+    protected boolean isBatteryPlugged() {
+        return plugged;
+    }
+
+    protected boolean isBatteryPresent() {
+        // the battery widget always is shown.
+        return true;
+    } 
+ 
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+            level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
 
-            boolean plugged = false;
+            plugged = false;
             switch (status) {
                 case BatteryManager.BATTERY_STATUS_CHARGING: 
                 case BatteryManager.BATTERY_STATUS_FULL:
@@ -98,8 +122,46 @@ public class BatteryController extends BroadcastReceiver {
             }
 
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-                cb.onBatteryLevelChanged(level, plugged);
+                cb.onBatteryLevelChanged(level, status);
             }
         }
     }
+    
+    protected void updateViews() {
+        int level = getBatteryLevel();
+        int N = mIconViews.size();
+        for (int i=0; i<N; i++) {
+            ImageView v = mIconViews.get(i);
+            v.setImageLevel(level);
+            v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
+                    level));
+        }
+        N = mLabelViews.size();
+
+        for (BatteryStateChangeCallback cb : mChangeCallbacks) {
+            cb.onBatteryLevelChanged(level, status);
+        }
+    }    
+    
+    protected void updateBattery() {
+        int N = mIconViews.size();
+        final int icon = plugged ? R.drawable.stat_sys_battery_charge
+                                     : R.drawable.stat_sys_battery;
+        
+        for (int i=0; i<N; i++) {
+                ImageView v = mIconViews.get(i);
+                v.setImageResource(icon);
+                v.setImageLevel(level);
+                v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
+                        level));
+        }
+        N = mLabelViews.size();
+        for (int i=0; i<N; i++) {
+                TextView v = mLabelViews.get(i);
+                v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
+                        level));
+        }
+    }
+
+
 }
