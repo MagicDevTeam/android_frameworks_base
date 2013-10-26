@@ -721,20 +721,6 @@ class QuickSettings {
         mContainerView.requestLayout();
     }
 
-    private void removeAllBrightnessDialogCallbacks() {
-        mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
-    }
-
-    private Runnable mDismissBrightnessDialogRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mBrightnessDialog != null && mBrightnessDialog.isShowing()) {
-                mBrightnessDialog.dismiss();
-            }
-            removeAllBrightnessDialogCallbacks();
-        };
-    };
-
     private void showBrightnessDialog() {
         Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
         mContext.sendBroadcast(intent);

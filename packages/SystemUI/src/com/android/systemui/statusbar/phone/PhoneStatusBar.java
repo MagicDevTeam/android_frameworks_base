@@ -101,6 +101,7 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.DockBatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
@@ -168,9 +169,12 @@ public class PhoneStatusBar extends BaseStatusBar {
     // These are no longer handled by the policy, because we need custom strategies for them
     BluetoothController mBluetoothController;
     BatteryController mBatteryController;
+    DockBatteryController mDockBatteryController;
     LocationController mLocationController;
     NetworkController mNetworkController;
 
+    private boolean mHasDockBattery;
+    
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
     int mIconHPadding = -1;
@@ -601,7 +605,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Other icons
         mLocationController = new LocationController(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
-        mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
+        mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));        
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
         final SignalClusterView signalCluster =
