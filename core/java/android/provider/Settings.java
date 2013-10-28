@@ -1789,13 +1789,143 @@ public final class Settings {
          * @hide
          */
         public static final String AUTO_BRIGHTNESS_RESPONSIVENESS = "auto_brightness_responsiveness";
+        
+        /**
+	 * Whether to enable adjustment of automatic brightness adjustment
+	 * to sunrise and sunset.
+	 * @hide
+	 */
+        public static final String AUTO_BRIGHTNESS_TWILIGHT_ADJUSTMENT = "auto_brightness_twilight_adjustment";
+        
+        /**
+	 * Quick Settings Collapse Pane
+	 *
+	 * @hide
+	 */
+        public static final String QS_COLLAPSE_PANEL = "qs_collapse_panel";
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_ALARM = "qs_dyanmic_alarm";
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_BUGREPORT = "qs_dyanmic_bugreport";
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
 
         /**
-         * Whether to enable adjustment of automatic brightness adjustment
-         * to sunrise and sunset.
+	 * Quick Settings Quick Pulldown
+	 *
+	 * @hide
+	 */
+        public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";        
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_IME = "qs_dyanmic_ime";
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_USBTETHER = "qs_dyanmic_usbtether";
+        
+        /**
+	 * Quick Settings Panel Dynamic Tiles
+	 *
+	 * @hide
+	 */
+        public static final String QS_DYNAMIC_DOCK_BATTERY = "qs_dyanmic_dock_battery";
+        
+        /**
+	 * Quick Settings Panel Tiles to Use
+	 *
+	 * @hide
+	 */
+        public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
+        
+        /**
+	 * Quick Settings Ribbon Tiles to Use
+	 *
+	 * @hide
+	 */
+        public static final String QUICK_SETTINGS_RIBBON_TILES = "quick_settings_ribbon_tiles";
+        
+        /**
+	 * Quick Settings Quick access ribbon
+	 *
+	 * @hide
+	 */
+        public static final String QS_QUICK_ACCESS = "qs_quick_access";
+        
+        /**
+	 * Quick Settings Quick access ribbon - linked layout
+	 *
+	 * @hide
+	 */
+        public static final String QS_QUICK_ACCESS_LINKED = "qs_quick_access_linked";
+        
+        /**
+	 * Quick Settings - Custom Network Mode
+	 * @hide
+	 */
+        public static final String EXPANDED_NETWORK_MODE = "expanded_network_mode";
+        
+        /**
+	 * Quick Settings - Custom Ring Mode
+	 * @hide
+	 */
+        public static final String EXPANDED_RING_MODE = "expanded_ring_mode";
+        
+        /**
+	 * Quick Settings - Custom Screen Timeout
+	 * @hide
+	 */
+        public static final String EXPANDED_SCREENTIMEOUT_MODE = "expanded_screentimeout_mode";        
+
+        /**
+         * Whether to enable the electron beam animation when turning screen on
+         *
+         * @hide */
+        public static final String ELECTRON_BEAM_ANIMATION_ON = "electron_beam_animation_on";
+
+        /**
+         * The keyboard brightness to be used while the screen is on.
+         * Valid value range is between 0 and {@link PowerManager#getMaximumKeyboardBrightness()}
          * @hide
          */
-        public static final String AUTO_BRIGHTNESS_TWILIGHT_ADJUSTMENT = "auto_brightness_twilight_adjustment";
+        public static final String KEYBOARD_BRIGHTNESS = "keyboard_brightness";
+
+        /**
+         * The button brightness to be used while the screen is on or after a button press,
+         * depending on the value of {@link BUTTON_BACKLIGHT_TIMEOUT}.
+         * Valid value range is between 0 and {@link PowerManager#getMaximumButtonBrightness()}
+         * @hide
+         */
+        public static final String BUTTON_BRIGHTNESS = "button_brightness";
+
+        /**
+         * The time in ms to keep the button backlight on after pressing a button.
+         * A value of 0 will keep the buttons on for as long as the screen is on.
+         * @hide
+         */
+        public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
 
         /**
          * Whether to enable the electron beam animation when turning screen off
@@ -1803,28 +1933,6 @@ public final class Settings {
          * @hide */
         public static final String ELECTRON_BEAM_ANIMATION_OFF = "electron_beam_animation_off";
 
-        /**
-	 * The keyboard brightness to be used while the screen is on.
-	 * Valid value range is between 0 and {@link PowerManager#getMaximumKeyboardBrightness()}
-	 * @hide
-	 */
-        public static final String KEYBOARD_BRIGHTNESS = "keyboard_brightness";
-
-        /**
-	 * The button brightness to be used while the screen is on or after a button press,
-	 * depending on the value of {@link BUTTON_BACKLIGHT_TIMEOUT}.
-	 * Valid value range is between 0 and {@link PowerManager#getMaximumButtonBrightness()}
-	 * @hide
-	 */
-        public static final String BUTTON_BRIGHTNESS = "button_brightness";
-
-        /**
-	 * The time in ms to keep the button backlight on after pressing a button.
-	 * A value of 0 will keep the buttons on for as long as the screen is on.
-	 * @hide
-	 */
-        public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
-        
         /**
          * Control whether the process CPU usage meter should be shown.
          *
@@ -2482,6 +2590,13 @@ public final class Settings {
          * @hide
          */
         public static final String LTE_MODE = "lte_mode";
+ 
+ 
+         /**
+        * AutoHide CombinedBar on tablets.
+        * @hide
+        */
+        public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
 
         /**
          * Display style of AM/PM next to clock in status bar
@@ -2523,12 +2638,9 @@ public final class Settings {
          */
         public static final String STATUS_BAR_SIGNAL_TEXT = "status_bar_signal";
 
-        /**
-         * Pointer speed setting.
-         * This is an integer value in a range between -7 and +7, so there are 15 possible values.
-         *   -7 = slowest
-         *    0 = default speed
-         *   +7 = fastest
+         /**
+         * Whether to control brightness from status bar
+         *
          * @hide
          */
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
@@ -2559,140 +2671,6 @@ public final class Settings {
          * @hide
          */
         public static final String SCREEN_LOCK_SLIDE_SCREENOFF_DELAY = "screen_lock_slide_screenoff_delay";
-
-        /**
-         * Quick Settings Panel Tiles to Use
-         *
-         * @hide
-         */
-        public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_ALARM = "qs_dyanmic_alarm";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_BUGREPORT = "qs_dyanmic_bugreport";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_IME = "qs_dyanmic_ime";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_USBTETHER = "qs_dyanmic_usbtether";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_DOCK_BATTERY = "qs_dyanmic_dock_battery";
-
-        /**
-         * Quick Settings Panel Dynamic Tiles
-         *
-         * @hide
-         */
-        public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
-
-        /**
-         * Quick Settings Quick Pulldown
-         *
-         * @hide
-         */
-        public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
-
-        /**
-         * Quick Settings Collapse Pane
-         *
-         * @hide
-         */
-        public static final String QS_COLLAPSE_PANEL = "qs_collapse_panel";
-
-        /**
-         * Quick Settings Quick access ribbon
-         *
-         * @hide
-         */
-        public static final String QS_QUICK_ACCESS = "qs_quick_access";
-
-        /**
-         * Quick Settings Quick access ribbon - linked layout
-         *
-         * @hide
-         */
-        public static final String QS_QUICK_ACCESS_LINKED = "qs_quick_access_linked";
-
-        /**
-         * Quick Settings Ribbon Tiles to Use
-         *
-         * @hide
-         */
-        public static final String QUICK_SETTINGS_RIBBON_TILES = "quick_settings__ribbon_tiles";
-
-        /**
-         * Navigation controls to Use
-         *
-         * @hide
-         */
-        public static final String NAV_BUTTONS = "nav_buttons";
-
-        /**
-        * Quick Settings - Custom Network Mode
-        * @hide
-        */
-        public static final String EXPANDED_NETWORK_MODE = "expanded_network_mode";
-
-        /**
-        * Quick Settings - Custom Screen Timeout
-        * @hide
-        */
-        public static final String EXPANDED_SCREENTIMEOUT_MODE = "expanded_screentimeout_mode";
-
-        /**
-        * Quick Settings - Custom Ring Mode
-        * @hide
-        */
-        public static final String EXPANDED_RING_MODE = "expanded_ring_mode";
-
-        /**
-        * AutoHide CombinedBar on tablets.
-        * @hide
-        */
-        public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
-
-        /**
-         * Whether to collapse the notification area after dismissing the last notification
-         * @hide
-         */
-        public static final String STATUS_BAR_COLLAPSE_ON_DISMISS = "status_bar_collapse_on_dismiss";
-
-        /** @hide */
-        public static final int STATUS_BAR_COLLAPSE_NEVER = 0;
-        /** @hide */
-        public static final int STATUS_BAR_COLLAPSE_IF_EMPTIED = 1;
-        /** @hide */
-        public static final int STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE = 2;
-
-        /**
-         * Expanded desktop style (with status bar or without status bar)
-         * @hide
-         */
-        public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
 
         /**
          * Whether to use the custom quick unlock screen control
@@ -2867,6 +2845,13 @@ public final class Settings {
          * @hide
          */
         public static final String EXPANDED_DESKTOP_MODE = "expanded_desktop_mode";
+        
+
+        /**
+	 * Expanded desktop style (with status bar or without status bar)
+	 * @hide
+	 */
+        public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";        
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DOCK_SOUNDS_ENABLED}
@@ -3010,28 +2995,7 @@ public final class Settings {
 	 * Whether to unlock the screen with the home key. The value is boolean (1 or 0).
 	 * @hide
 	 */
-        public static final String HOME_UNLOCK_SCREEN = "home_unlock_screen";        
-        
-        /**
-	 * Whether the lockscreen vibrate should be enabled.
-	 * @hide
-	 */
-	public static final String LOCKSCREEN_VIBRATE_ENABLED = "lockscreen.vibrate_enabled";
-
-	/**
-	 * Show the pending notification counts as overlays on the status bar
-	 * Whether to enable custom rebindings of the actions performed on
-	 * certain key press events.
-	 * @hide
-	 */
-        public static final String HARDWARE_KEY_REBINDING = "hardware_key_rebinding";
-
-         /**
-          * Action to perform when the assistant (search) key is pressed. (Default is 3)
-          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
-          * @hide
-          */
-         public static final String KEY_ASSIST_ACTION = "key_assist_action";
+        public static final String HOME_UNLOCK_SCREEN = "home_unlock_screen";
 
          /**
           * Swap volume buttons when the screen is rotated
@@ -3105,6 +3069,13 @@ public final class Settings {
          */
         public static final String VOLUME_KEYS_CONTROL_RING_STREAM = "volume_keys_control_ring_stream";
 
+        /**
+         * Whether to enable custom rebindings of the actions performed on
+         * certain key press events.
+         * @hide
+         */
+        public static final String HARDWARE_KEY_REBINDING = "hardware_key_rebinding";
+
          /**
           * Action to perform when the home key pressed. (Default is 1)
           * 0 - Nothing
@@ -3164,6 +3135,13 @@ public final class Settings {
           * @hide
           */
          public static final String KEY_MENU_LONG_PRESS_ACTION = "key_menu_long_press_action";
+
+         /**
+          * Action to perform when the assistant (search) key is pressed. (Default is 3)
+          * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+          * @hide
+          */
+         public static final String KEY_ASSIST_ACTION = "key_assist_action";
 
          /**
           * Action to perform when the assistant (search) key is long-pressed. (Default is 6)
