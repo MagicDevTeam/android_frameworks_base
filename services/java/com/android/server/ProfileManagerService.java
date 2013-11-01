@@ -202,35 +202,42 @@ public class ProfileManagerService extends IProfileManager.Stub {
             if (LOCAL_LOGV) Log.v(TAG, "setActiveProfile(Profile, boolean) - Running init");
 
             /*
-	     * We need to clear the caller's identity in order to
-	     * - allow the profile switch to execute actions
-	     * not included in the caller's permissions
-	     * - broadcast INTENT_ACTION_PROFILE_SELECTED
-	     */
+             * We need to clear the caller's identity in order to
+             * - allow the profile switch to execute actions
+             *   not included in the caller's permissions
+             * - broadcast INTENT_ACTION_PROFILE_SELECTED
+             */
             long token = clearCallingIdentity();
 
             // Call profile's "doSelect"
-            mActiveProfile.doSelect(mContext);                
+            mActiveProfile.doSelect(mContext);
 
-                // Notify other applications of newly selected profile.
-                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
-                broadcast.putExtra("name", mActiveProfile.getName());
-                broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
-                broadcast.putExtra("lastName", lastProfile.getName());
-                broadcast.putExtra("lastUuid", lastProfile.getUuid().toString());
-                mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+            // Notify other applications of newly selected profile.
+            Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_NAME,
+                    mActiveProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_UUID,
+                    mActiveProfile.getUuid().toString());
+            broadcast.putExtra(ProfileManager.EXTRA_LAST_PROFILE_NAME,
+                    lastProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_LAST_PROFILE_UUID,
+                    lastProfile.getUuid().toString());
 
-                restoreCallingIdentity(token);
-                persistIfDirty();
-            } else if (lastProfile != mActiveProfile) {
-                // Something definitely changed: notify.
-                long token = clearCallingIdentity();
-                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
-                broadcast.putExtra("name", mActiveProfile.getName());
-                broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
-                mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
-                restoreCallingIdentity(token);
-            }
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+
+            restoreCallingIdentity(token);
+            persistIfDirty();
+        } else if (lastProfile != mActiveProfile && ActivityManagerNative.isSystemReady()) {
+            // Something definitely changed: notify.
+            long token = clearCallingIdentity();
+            Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_NAME,
+                    mActiveProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_UUID,
+                    mActiveProfile.getUuid().toString());
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+            restoreCallingIdentity(token);
+        }
     }
 
     @Override
