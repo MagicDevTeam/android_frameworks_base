@@ -301,6 +301,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemBooted;
     boolean mHdmiPlugged;
     boolean mWifiDisplayConnected;
+	int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
@@ -4777,9 +4778,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // and then updates our own bookkeeping based on the now-
                 // current user.
                 mSettingsObserver.onChange(false);
+
+                // force a re-application of focused window sysui visibility.
+                // the window may never have been shown for this user
+                // e.g. the keyguard when going through the new-user setup flow
+                synchronized(mLock) {
+                    mLastSystemUiFlags = 0;
+                    updateSystemUiVisibilityLw();
+                }
             }
         }
     };
+
     BroadcastReceiver mWifiDisplayReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -4791,17 +4801,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mWifiDisplayConnected = false;
                 }
                 updateRotation(true);
-            }
-        }
-    };
-
-                // force a re-application of focused window sysui visibility.
-                // the window may never have been shown for this user
-                // e.g. the keyguard when going through the new-user setup flow
-                synchronized(mLock) {
-                    mLastSystemUiFlags = 0;
-                    updateSystemUiVisibilityLw();
-                }
             }
         }
     };

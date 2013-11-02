@@ -1643,13 +1643,6 @@ public class Camera {
         void onCameraMetaData(byte[] data, Camera camera);
     };
 
-    public final void setMetadataCb(CameraMetaDataCallback cb)
-    {
-        mCameraMetaDataCallback = cb;
-        native_setMetadataCb(cb!=null);
-    }
-    private native final void native_setMetadataCb(boolean mode);
-
     /** @hide
      * Set camera meta data and registers a callback function to run.
      *  Only valid after startPreview() has been called.
