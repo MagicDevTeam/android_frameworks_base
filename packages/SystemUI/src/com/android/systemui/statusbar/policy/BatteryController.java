@@ -128,10 +128,6 @@ public class BatteryController extends BroadcastReceiver {
         mChangeCallbacks.remove(cb);
     }
 
-    public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
-        mChangeCallbacks.remove(cb);
-    }
-
     // Allow override battery icons
     public int getIconStyleUnknown() {
         return R.drawable.stat_sys_battery;

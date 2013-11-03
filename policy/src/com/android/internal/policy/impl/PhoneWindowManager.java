@@ -82,7 +82,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 
->>>>>>> 042159d... SystemUI: Add dock battery icon styles
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
