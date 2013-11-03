@@ -249,6 +249,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private TextView mEmergencyCallLabel;
     private int mNotificationHeaderHeight;
 
+    private SignalClusterView mSignalView;
+    private SignalClusterTextView mSignalTextView;
     private Clock mClock;
 
     private boolean mShowCarrierInPanel = false;
@@ -631,12 +633,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));        
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
-        final SignalClusterView signalCluster =
-                (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
+
+        mSignalView = (SignalClusterView) mStatusBarView.findViewById(R.id.signal_cluster);
         mSignalTextView = (SignalClusterTextView) mStatusBarView.findViewById(R.id.signal_cluster_text);
 
-        mNetworkController.addSignalCluster(signalCluster);
-        signalCluster.setNetworkController(mNetworkController);
+        mSignalView.setNetworkController(mNetworkController);
 
         ///final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         //if (isAPhone) {
