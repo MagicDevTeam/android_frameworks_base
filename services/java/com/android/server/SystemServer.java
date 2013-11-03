@@ -438,7 +438,7 @@ class ServerThread extends Thread {
                 themeService = new ThemeManagerService(context);
                 ServiceManager.addService("ThemeService", themeService);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting ThemeManagerService Service", e);
+                reportWtf("Failure starting ThemeManagerService Service", e);
             }
 
             try {
