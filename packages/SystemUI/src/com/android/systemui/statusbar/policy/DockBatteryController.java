@@ -123,5 +123,4 @@ public class DockBatteryController extends BatteryController {
     protected boolean isBatteryPresent() {
         return mBatteryPresent;
     }
-
 }
