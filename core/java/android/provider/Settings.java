@@ -2914,6 +2914,13 @@ public final class Settings {
         @Deprecated
         public static final String POWER_SOUNDS_ENABLED = Global.POWER_SOUNDS_ENABLED;
 
+        /**
+         * Navigation controls to Use
+         *
+         * @hide
+         */
+        public static final String NAV_BUTTONS = "nav_buttons";
+
          /**
          * Whether Expanded desktop is currently running or not
          * @hide

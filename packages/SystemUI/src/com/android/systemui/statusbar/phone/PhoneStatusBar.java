@@ -543,7 +543,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav && !mRecreating) {
+            if (mNavigationBarView == null && showNav && !mRecreating) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
@@ -1036,11 +1036,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
-
-        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
-        mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
-        mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
-        mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
+        mNavigationBarView.setListeners(mRecentsClickListener,
+                mRecentsPreloadOnTouchListener, mHomeSearchActionListener);
         updateSearchPanel();
     }
 
@@ -2901,6 +2898,34 @@ public class PhoneStatusBar extends BaseStatusBar {
         animateCollapsePanels();
         updateNotificationIcons();
         resetUserSetupObserver();
+        mSettingsObserver.onChange(true);
+        //mPowerWidget.setupWidget();
+        //mPowerWidget.updateVisibility();
+        //if (mTilesChangedObserver != null) {
+        //    mTilesChangedObserver.onChange(true);
+        //}
+       // if (mSignalView != null) {
+        //    mSignalView.updateSettings();
+       // }
+        //if (mSignalTextView != null) {
+       //     mSignalTextView.updateSettings();
+        //}
+        //if (mBatteryController != null) {
+       //     mBatteryController.updateSettings();
+       // }
+       // if (mCircleBattery != null) {
+       //     mCircleBattery.updateSettings();
+       /// }
+        //if (mCircleDockBattery != null) {
+        ///    mCircleDockBattery.updateSettings();
+        //}
+       // //if (mClock != null) {
+        //    mClock.updateSettings();
+        //}
+        if (mNavigationBarView != null) {
+            mNavigationBarView.updateSettings();
+        }
+        super.userSwitched(newUserId);
     }
 
     private void resetUserSetupObserver() {
@@ -2966,6 +2991,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         makeStatusBarView();
         repositionNavigationBar();
+        if (mNavigationBarView != null)
+            mNavigationBarView.updateResources();
 
         // recreate StatusBarIconViews.
         for (int i = 0; i < nIcons; i++) {
@@ -3118,6 +3145,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected boolean shouldDisableNavbarGestures() {
         return !isDeviceProvisioned()
                 || mExpandedVisible
+                || (mNavigationBarView != null && mNavigationBarView.isInEditMode())
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
