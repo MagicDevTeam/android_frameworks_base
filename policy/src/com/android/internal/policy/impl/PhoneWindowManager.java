@@ -349,6 +349,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasAssistKey;
     boolean mHasAppSwitchKey;
     boolean mHasCameraKey;
+    //boolean mHasNavigationBar;
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
@@ -1467,99 +1468,131 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mVolBtnMusicControls = (Settings.System.getIntForUser(resolver,
                     Settings.System.VOLBTN_MUSIC_CONTROLS, 1, UserHandle.USER_CURRENT) == 1);
 
-            boolean keyRebindingEnabled = Settings.System.getInt(resolver,
-                    Settings.System.HARDWARE_KEY_REBINDING, 0) == 1;
-
-            if (!keyRebindingEnabled) {
-                if (mHasHomeKey) {
-                    mPressOnHomeBehavior = getStr(KEY_ACTION_HOME);
-                    if (mHasAppSwitchKey) {
-                        mLongPressOnHomeBehavior = getStr(KEY_ACTION_NOTHING);
-                    } else {
-                        mLongPressOnHomeBehavior = getStr(KEY_ACTION_APP_SWITCH);
-                    }
-                }
-                if (mHasBackKey) {
-                    mPressOnBackBehavior = getStr(KEY_ACTION_BACK);
-                    mLongPressOnBackBehavior = getStr(KEY_ACTION_NOTHING);
-                }
-                if (mHasMenuKey) {
-                    mPressOnMenuBehavior = getStr(KEY_ACTION_MENU);
-                    if (mHasAssistKey) {
-                        mLongPressOnMenuBehavior = getStr(KEY_ACTION_NOTHING);
-                    } else {
-                        mLongPressOnMenuBehavior = getStr(KEY_ACTION_SEARCH);
-                    }
-                }
-                if (mHasAssistKey) {
-                    mPressOnAssistBehavior = getStr(KEY_ACTION_SEARCH);
-                    mLongPressOnAssistBehavior = getStr(KEY_ACTION_VOICE_SEARCH);
-                }
-                if (mHasAppSwitchKey) {
-                    mPressOnAppSwitchBehavior = getStr(KEY_ACTION_APP_SWITCH);
-                    mLongPressOnAppSwitchBehavior = getStr(KEY_ACTION_NOTHING);
-                }
-                if (mHasCameraKey) {
-                    mPressOnCameraBehavior = getStr(KEY_ACTION_CAMERA);
-                    mLongPressOnCameraBehavior = getStr(KEY_ACTION_NOTHING);
-                }
-            } else {
-                if (mHasHomeKey) {
-                    mPressOnHomeBehavior = getDefString(resolver,
-                            Settings.System.KEY_HOME_ACTION, KEY_ACTION_HOME);
-                    if (mHasAppSwitchKey) {
-                        mLongPressOnHomeBehavior = getDefString(resolver,
-                                Settings.System.KEY_HOME_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
-                    } else {
-                        mLongPressOnHomeBehavior = getDefString(resolver,
-                                Settings.System.KEY_HOME_LONG_PRESS_ACTION, KEY_ACTION_APP_SWITCH);
-                    }
-                }
-                if (mHasBackKey) {
-                    mPressOnBackBehavior = getDefString(resolver,
-                            Settings.System.KEY_BACK_ACTION, KEY_ACTION_BACK);
-                    mLongPressOnBackBehavior = getDefString(resolver,
-                            Settings.System.KEY_BACK_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
-                }
-                if (mHasMenuKey) {
-                    mPressOnMenuBehavior = getDefString(resolver,
-                            Settings.System.KEY_MENU_ACTION, KEY_ACTION_MENU);
-                    if (mHasAssistKey) {
-                        mLongPressOnMenuBehavior = getDefString(resolver,
-                                Settings.System.KEY_MENU_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
-                    } else {
-                        mLongPressOnMenuBehavior = getDefString(resolver,
-                                Settings.System.KEY_MENU_LONG_PRESS_ACTION, KEY_ACTION_SEARCH);
-                    }
-                }
-                if (mHasAssistKey) {
-                    mPressOnAssistBehavior = getDefString(resolver,
-                            Settings.System.KEY_ASSIST_ACTION, KEY_ACTION_SEARCH);
-                    mLongPressOnAssistBehavior = getDefString(resolver,
-                            Settings.System.KEY_ASSIST_LONG_PRESS_ACTION, KEY_ACTION_VOICE_SEARCH);
-                }
-                if (mHasAppSwitchKey) {
-                    mPressOnAppSwitchBehavior = getDefString(resolver,
-                            Settings.System.KEY_APP_SWITCH_ACTION, KEY_ACTION_APP_SWITCH);
-                    mLongPressOnAppSwitchBehavior = getDefString(resolver,
-                            Settings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
-                }
-                if (mHasCameraKey) {
-                    mPressOnCameraBehavior = getDefString(resolver,
-                            Settings.System.KEY_CAMERA_ACTION, KEY_ACTION_CAMERA);
-                    mLongPressOnCameraBehavior = getDefString(resolver,
-                            Settings.System.KEY_CAMERA_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
-                }
-            }
-
             /*final int showByDefault = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_showNavigationBar) ? 1 : 0;
             mHasNavigationBar = Settings.System.getInt(resolver,
                     Settings.System.NAVIGATION_BAR_SHOW, showByDefault) == 1;*/
-            
+
             mHasNavigationBar = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_showNavigationBar);
+    
+            boolean keyRebindingEnabled = Settings.System.getInt(resolver,
+                    Settings.System.HARDWARE_KEY_REBINDING, 0) == 1;
 
+            if (!mHasNavigationBar) {
+                //If we use the NavBar, forget the Hardware key settings
+                if (!keyRebindingEnabled) {
+                    if (mHasHomeKey) {
+                        mPressOnHomeBehavior = getStr(KEY_ACTION_HOME);
+                        if (mHasAppSwitchKey) {
+                            mLongPressOnHomeBehavior = getStr(KEY_ACTION_NOTHING);
+                        } else {
+                            mLongPressOnHomeBehavior = getStr(KEY_ACTION_APP_SWITCH);
+                        }
+                    }
+                    if (mHasBackKey) {
+                        mPressOnBackBehavior = getStr(KEY_ACTION_BACK);
+                        mLongPressOnBackBehavior = getStr(KEY_ACTION_NOTHING);
+                    }
+                    if (mHasMenuKey) {
+                        mPressOnMenuBehavior = getStr(KEY_ACTION_MENU);
+                        if (mHasAssistKey) {
+                            mLongPressOnMenuBehavior = getStr(KEY_ACTION_NOTHING);
+                        } else {
+                            mLongPressOnMenuBehavior = getStr(KEY_ACTION_SEARCH);
+                        }
+                    }
+                    if (mHasAssistKey) {
+                        mPressOnAssistBehavior = getStr(KEY_ACTION_SEARCH);
+                        mLongPressOnAssistBehavior = getStr(KEY_ACTION_VOICE_SEARCH);
+                    }
+                    if (mHasAppSwitchKey) {
+                        mPressOnAppSwitchBehavior = getStr(KEY_ACTION_APP_SWITCH);
+                        mLongPressOnAppSwitchBehavior = getStr(KEY_ACTION_NOTHING);
+                    }
+                    if (mHasCameraKey) {
+                        mPressOnCameraBehavior = getStr(KEY_ACTION_CAMERA);
+                        mLongPressOnCameraBehavior = getStr(KEY_ACTION_NOTHING);
+                    }
+                } else {
+                    if (mHasHomeKey) {
+                        mPressOnHomeBehavior = getDefString(resolver,
+                                Settings.System.KEY_HOME_ACTION, KEY_ACTION_HOME);
+                        if (mHasAppSwitchKey) {
+                            mLongPressOnHomeBehavior = getDefString(resolver,
+                                    Settings.System.KEY_HOME_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
+                        } else {
+                            mLongPressOnHomeBehavior = getDefString(resolver,
+                                    Settings.System.KEY_HOME_LONG_PRESS_ACTION,
+                                    KEY_ACTION_APP_SWITCH);
+                        }
+                    }
+                    if (mHasBackKey) {
+                        mPressOnBackBehavior = getDefString(resolver,
+                                Settings.System.KEY_BACK_ACTION, KEY_ACTION_BACK);
+                        mLongPressOnBackBehavior = getDefString(resolver,
+                                Settings.System.KEY_BACK_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
+                    }
+                    if (mHasMenuKey) {
+                        mPressOnMenuBehavior = getDefString(resolver,
+                                Settings.System.KEY_MENU_ACTION, KEY_ACTION_MENU);
+                        if (mHasAssistKey) {
+                            mLongPressOnMenuBehavior = getDefString(resolver,
+                                    Settings.System.KEY_MENU_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
+                        } else {
+                            mLongPressOnMenuBehavior = getDefString(resolver,
+                                    Settings.System.KEY_MENU_LONG_PRESS_ACTION, KEY_ACTION_SEARCH);
+                        }
+                    }
+                    if (mHasAssistKey) {
+                        mPressOnAssistBehavior = getDefString(resolver,
+                                Settings.System.KEY_ASSIST_ACTION, KEY_ACTION_SEARCH);
+                        mLongPressOnAssistBehavior = getDefString(resolver,
+                                Settings.System.KEY_ASSIST_LONG_PRESS_ACTION,
+                                KEY_ACTION_VOICE_SEARCH);
+                    }
+                    if (mHasAppSwitchKey) {
+                        mPressOnAppSwitchBehavior = getDefString(resolver,
+                                Settings.System.KEY_APP_SWITCH_ACTION, KEY_ACTION_APP_SWITCH);
+                        mLongPressOnAppSwitchBehavior = getDefString(resolver,
+                                Settings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION,
+                                KEY_ACTION_NOTHING);
+                    }
+                    if (mHasCameraKey) {
+                        mPressOnCameraBehavior = getDefString(resolver,
+                                Settings.System.KEY_CAMERA_ACTION, KEY_ACTION_CAMERA);
+                        mLongPressOnCameraBehavior = getDefString(resolver,
+                                Settings.System.KEY_CAMERA_LONG_PRESS_ACTION, KEY_ACTION_NOTHING);
+                    }
+                }
+            } else {
+                // we use NavBar, reset all key functions to default
+                
+                //Home key
+                mPressOnHomeBehavior = Integer.toString(KEY_ACTION_HOME);
+                mLongPressOnHomeBehavior = Integer.toString(KEY_ACTION_APP_SWITCH);
+                
+                //Back key
+                mPressOnBackBehavior = Integer.toString(KEY_ACTION_BACK);
+                mLongPressOnBackBehavior = Integer.toString(KEY_ACTION_NOTHING);
+                
+                //Menu key
+                mPressOnMenuBehavior = Integer.toString(KEY_ACTION_MENU);
+                mLongPressOnMenuBehavior = Integer.toString(KEY_ACTION_NOTHING);
+
+                //Assist key
+                mPressOnAssistBehavior = Integer.toString(KEY_ACTION_SEARCH);
+                mLongPressOnAssistBehavior = Integer.toString(KEY_ACTION_VOICE_SEARCH);
+
+                //AppSwitch key
+                mPressOnAppSwitchBehavior = Integer.toString(KEY_ACTION_APP_SWITCH);
+                mLongPressOnAppSwitchBehavior = Integer.toString(KEY_ACTION_NOTHING);
+
+                //Camera key
+                mPressOnCameraBehavior = Integer.toString(KEY_ACTION_CAMERA);
+                mLongPressOnCameraBehavior = Integer.toString(KEY_ACTION_NOTHING);
+            }
+            
             if ((mExpandedState == 1 &&
                 (mExpandedMode == 1 || mExpandedMode == 3))
                 || !mHasNavigationBar) {
@@ -2395,11 +2428,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean canceled = event.isCanceled();
         final boolean longPress = (flags & KeyEvent.FLAG_LONG_PRESS) != 0;
 
-        if (DEBUG_INPUT) {
+        //if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
                     + " canceled=" + canceled);
-        }
+        //}
 
         // If we think we might have a volume down & power key chord on the way
         // but we're not sure, then tell the dispatcher to wait a little while and
