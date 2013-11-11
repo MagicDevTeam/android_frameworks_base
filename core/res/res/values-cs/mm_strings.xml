@@ -23,7 +23,6 @@
     <string name="lockscreen_sim_error_message_short">Neplatná karta.</string>
     <string name="lockscreen_sim_error_message">Karta SIM je neplatná.</string>
     <string name="lockscreen_perso_locked_message">Karta SIM/RUIM je zamčená</string>
-    <string name="vpn_lockdown_config">Dotykem nastavit</string>
     <string name="stk_cc_ussd_to_dial">Požadavek USSD je změněn na požadavek DIAL.</string>
     <string name="stk_cc_ussd_to_ss">Požadavek USSD je změněn na požadavek SS.</string>
     <string name="stk_cc_ussd_to_ussd">Požadavek USSD je změněn na nový požadavek USSD.</string>
