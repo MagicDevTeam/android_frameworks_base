@@ -3647,8 +3647,6 @@
     <string name="vpn_lockdown_connected">Always-on VPN connected</string>
     <!-- Notification title when error connecting to lockdown VPN. -->
     <string name="vpn_lockdown_error">Always-on VPN error</string>
-    <!-- Notification body that indicates user can touch to configure lockdown VPN connection. -->
-    <string name="vpn_lockdown_config">Touch to configure</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
@@ -4209,5 +4207,4 @@
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
-
 </resources>
