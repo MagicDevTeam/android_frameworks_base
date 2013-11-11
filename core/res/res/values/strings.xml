@@ -18,7 +18,7 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Suffix added to a number to signify size in bytes. -->
+    <!-- Suffix added to a number to signify size in bytes. -->permlab_sendMockSms
     <string name="byteShort">B</string>
     <!-- Suffix added to a number to signify size in kilobytes. -->
     <string name="kilobyteShort">KB</string>
@@ -3647,8 +3647,6 @@
     <string name="vpn_lockdown_connected">Always-on VPN connected</string>
     <!-- Notification title when error connecting to lockdown VPN. -->
     <string name="vpn_lockdown_error">Always-on VPN error</string>
-    <!-- Notification body that indicates user can touch to configure lockdown VPN connection. -->
-    <string name="vpn_lockdown_config">Touch to configure</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
@@ -4209,77 +4207,4 @@
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
-    
-    
-    
-    <!--========================================================================
-    
-    Additional Strings From Here
-    
-      =========================================================================== -->
-    
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sendMockSms">Send mock SMS messages</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sendMockSms">Allows the app to send mock SMS messages.
-       This allows an app send SMS to trusted applications. Malicious apps could send messages
-       continuously, blocking the device notification system and disrupting the user.</string>    
-    
-
-    <!-- label for item that reboots the phone in phone options dialog -->
-    <string name="global_action_reboot">Reboot</string>
-
-    <!-- label for item that opens the profile choosing dialog -->
-    <string name="global_action_choose_profile">Profile</string>
-
-    <!-- In WiFi AP notification -->
-    <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
-
-    <!-- The title of the profile picker dialog. -->
-    <string name="profile_picker_title">Profiles</string>
-
-    <!-- The item label for the no profile selection item. -->
-    <string name="profile_none">None</string>
-
-    <!-- Privacy Guard -->
-    <string name="permlab_changePrivacyGuardState">enable or disable privacy guard</string>
-    <string name="permdesc_changePrivacyGuardState">Allows the application to change whether another application runs with Privacy Guard. When an application is running with Privacy Guard, it will not have access to personal data such as contacts, call logs or messages.</string>
-    <string name="privacy_guard_notification">Privacy Guard active</string>
-    <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> will not be able to access personal data</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_interceptSmsSent">intercept outgoing SMS</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_interceptSmsSent">Allows the app to intercept an outgoing SMS. Malicious apps may use this to prevent outgoing SMS messages.</string>
-
-    <!-- allows cancelling notifications from other apps. -->
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_cancelNotifications">cancel application notifications</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_cancelNotifications">Allows the app to cancel notifications created by other apps.</string>
-
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
-    
-    <!-- Notification for Expanded desktop default -->
-    <string name="expanded_mode_default_set">Expanded desktop set to hide statusbar only. Configure in Power menu settings</string>
-    <string name="expanded_mode_default_with_navbar_set">Expanded desktop set to hide status and navigation bar. Configure in Power menu settings</string>
-    
-
-    <!-- Displayed when the USSD/SS request is modified by STK CC to a
-    different request. This will be displayed in a toast. -->
-    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
-    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
-    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
-    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
-    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
-    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
-
-    <!-- Multi SIM related -->
-    <!-- Message used in Multi SIM enabled SIM PIN view -->
-    <string name="msim_kg_sim_pin_msg_format">SUB:<xliff:g id="number">%d</xliff:g> : <xliff:g id="msg">%s</xliff:g>.</string>
-
-    <!-- Carrier text used in Multi SIM enabled view -->
-    <string name="msim_carrier_text_format"><xliff:g id="text_1">%s</xliff:g>, <xliff:g id="text_2">%s</xliff:g></string>
 </resources>
