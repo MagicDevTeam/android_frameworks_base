@@ -1736,6 +1736,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mScrollView.setVisibility(View.VISIBLE);
             mScrollView.setScaleX(-percent);
             mNotificationButton.setVisibility(View.GONE);
+            updateCarrierAndWifiLabelVisibility(false, false);
         } else { // settings side
             mFlipSettingsView.setScaleX(percent);
             mFlipSettingsView.setVisibility(View.VISIBLE);
@@ -1744,6 +1745,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mScrollView.setScaleX(0f);
             mNotificationButton.setVisibility(View.VISIBLE);
             mNotificationButton.setAlpha(percent);
+            updateCarrierAndWifiLabelVisibility(false, true);
         }
         mClearButton.setVisibility(View.GONE);
     }
@@ -1794,11 +1796,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 ObjectAnimator.ofFloat(mClearButton, View.ALPHA, 0f)
                 .setDuration(FLIP_DURATION),
                 mClearButton, View.INVISIBLE));
-        mNotificationPanel.postDelayed(new Runnable() {
-            public void run() {
-                updateCarrierAndWifiLabelVisibility(false, false);
-            }
-        }, FLIP_DURATION - 150);
+        updateCarrierAndWifiLabelVisibility(false, true);
     }
 
     public void flipPanels() {
