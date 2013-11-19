@@ -998,7 +998,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                                 }
                             }
                         }
-                        Dialog d = new AppErrorDialog(getUiContext(),
+                        Dialog d = new AppErrorDialog(mContext,
                                 ActivityManagerService.this, res, proc, hasRevoked);
                         d.show();
                         proc.crashDialog = d;
