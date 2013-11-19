@@ -24,6 +24,7 @@
   <java-symbol type="array" name="notification_light_package_mapping" />
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+  <java-symbol type="bool" name="config_multiColorNotificationLed" />
 
   <!-- Config Power Menu -->
   <java-symbol type="drawable" name="ic_lock_reboot" />
