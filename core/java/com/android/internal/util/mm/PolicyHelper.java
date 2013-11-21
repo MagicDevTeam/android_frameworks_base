@@ -39,6 +39,7 @@ public class PolicyHelper {
     private static final String TAG = "mm.PolicyHelper";
     
     private static final String SYSTEM_METADATA_NAME = "android";
+    private static final String SYSTEMUI_METADATA_NAME = "com.android.systemui";
 
     // get @ButtonConfig with description if needed and other then an app description
     public static ArrayList<ButtonConfig> getPowerMenuConfigWithDescription(
@@ -72,6 +73,7 @@ public class PolicyHelper {
         int iconColor = -2;
         int colorMode = 0;
         Drawable d = null;
+        Drawable dError = null;
         PackageManager pm = context.getPackageManager();
         if (pm == null) {
             Log.e(TAG, "Can't find this res package");
@@ -91,6 +93,31 @@ public class PolicyHelper {
             if (iconColor == -2) {
                 iconColor = context.getResources().getColor(
                     com.android.internal.R.color.power_menu_icon_default_color);
+            }
+        }
+
+        if (!clickAction.startsWith("**")) {
+            try {
+                d = pm.getActivityIcon(Intent.parseUri(clickAction, 0));
+            } catch (NameNotFoundException e) {
+                Resources systemUiResources;
+                try {
+                    systemUiResources = pm.getResourcesForApplication(SYSTEMUI_METADATA_NAME);
+                } catch (Exception ex) {
+                    Log.e("PolicyHelper:", "can't access systemui resources",e);
+                    return null;
+                }
+                resId = systemUiResources.getIdentifier(
+                    SYSTEMUI_METADATA_NAME + ":drawable/ic_sysbar_null", null, null);
+                if (resId > 0) {
+                    dError = systemUiResources.getDrawable(resId);
+                    if (colorMode != 3 && colorMode == 0 && colorize) {
+                        dError = new BitmapDrawable(
+                            ColorHelper.getColoredBitmap(dError, iconColor));
+                    }
+                }
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
             }
         }
 
@@ -128,18 +155,15 @@ public class PolicyHelper {
                 d = new BitmapDrawable(ColorHelper.getColoredBitmap(d, iconColor));
             }
         } else {
-            try {
-                d = pm.getActivityIcon(Intent.parseUri(clickAction, 0));
-                if (colorMode != 3 && colorMode == 0 && colorize) {
-                    d = new BitmapDrawable(ColorHelper.getColoredBitmap(d, iconColor));
-                }
-            } catch (NameNotFoundException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+            if (colorMode != 3 && colorMode == 0 && colorize) {
+                d = new BitmapDrawable(ColorHelper.getColoredBitmap(d, iconColor));
             }
         }
-        return ColorHelper.resize(context, d, 35);
+        if (dError == null) {
+            return ColorHelper.resize(context, d, 35);
+        } else {
+            return ColorHelper.resize(context, dError, 35);
+        }
     }
 
     private static Drawable getPowerMenuSystemIcon(Context context, String clickAction) {
