@@ -2659,6 +2659,12 @@ public final class Settings {
          */
         public static final String EGG_MODE = "egg_mode";
 
+       /**
+         * Show when WiFi or data mobile is sending/receiving data
+         * @hide
+         */
+        public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
+
         /**
          * Show or hide clock
          * 0 - hide
