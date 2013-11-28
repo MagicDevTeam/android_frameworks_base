@@ -16,8 +16,15 @@
 
 package com.android.keyguard;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -57,10 +64,7 @@ public class KeyguardStatusView extends GridLayout {
 
         @Override
         void onKeyguardVisibilityChanged(boolean showing) {
-            if (showing) {
-                if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
-                refresh();
-            }
+            // Do nothing
         };
 
         @Override
@@ -75,6 +79,20 @@ public class KeyguardStatusView extends GridLayout {
             setEnableMarquee(false);
             enableRefresh = false;
         };
+    };
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            refresh();
+        }
+    };
+
+    private ContentObserver mContentObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            refresh();
+        }
     };
 
     public KeyguardStatusView(Context context) {
@@ -133,12 +151,22 @@ public class KeyguardStatusView extends GridLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+
+        IntentFilter f = new IntentFilter();
+        f.addAction(Intent.ACTION_LOCALE_CHANGED);
+        mContext.registerReceiver(mBroadcastReceiver, f);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.TIME_12_24), false, mContentObserver);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+
+        mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
     }
 
     public int getAppWidgetId() {
