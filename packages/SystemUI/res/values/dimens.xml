@@ -251,4 +251,7 @@
 
 <!--    <dimen name="wifi_combo_margin_right">-6dp</dimen>-->
 
+    <!-- Network stats text size -->
+    <dimen name="network_stats_text_size">10dp</dimen>
+
 </resources>
