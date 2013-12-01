@@ -1922,7 +1922,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                             && (r.getUserId() == UserHandle.USER_ALL ||
                                 (r.getUserId() == userId && r.getUserId() == currentUser))
                             && canInterrupt
-                            && mSystemReady) {
+                            && mSystemReady
+                            && !notificationIsAnnoying(pkg)) {
 
                         final AudioManager audioManager = (AudioManager) mContext
                         .getSystemService(Context.AUDIO_SERVICE);
