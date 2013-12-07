@@ -2722,6 +2722,25 @@ public final class Settings {
         public static final String STATUSBAR_CLOCK_DATE_FORMAT = "statusbar_clock_date_format";
 
         /**
+         * Whether to show the signal text or signal bars.
+         * default: 0 
+         * 0: show signal bars 
+         * 1: show signal text numbers 
+         * 2: hidden
+         * 
+         * @hide
+         */
+        public static final String STATUS_BAR_SIGNAL_TEXT = "status_bar_signal";
+        
+        /**
+         * StatusBar signal color
+         * 
+         * @hide
+         */
+        public static final String STATUS_BAR_SIGNAL_TEXT_COLOR = "statusbar_signal_text_color";
+        
+        
+        /**
          * Config for advanced power menu
          *
          * @hide
