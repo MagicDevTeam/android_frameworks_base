@@ -80,4 +80,8 @@
   <!-- Force permanent menu key -->
   <java-symbol type="bool" name="config_force_permanent_menu_key" />
 
+  <!-- Stylus gestures -->
+  <java-symbol type="bool" name="config_stylusGestures" />
+  <java-symbol type="string" name="stylus_app_not_installed" />
+
 </resources>

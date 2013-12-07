@@ -1348,4 +1348,8 @@
 
   <!-- Force permanent menu key -->
     <bool name="config_force_permanent_menu_key">false</bool>
+
+    <!-- Boolean to enable Stylus gestures -->
+    <bool name="config_stylusGestures">false</bool>
+
 </resources>
