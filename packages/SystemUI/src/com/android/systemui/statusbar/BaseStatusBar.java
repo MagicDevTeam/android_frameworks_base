@@ -26,6 +26,7 @@ import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -33,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -52,6 +54,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -73,6 +76,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.internal.util.mm.DeviceUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -505,8 +509,19 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
-        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_search_panel, tmpRoot, false);
+
+        boolean navbarCanMove = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.NAVIGATION_BAR_CAN_MOVE,
+                DeviceUtils.isPhone(mContext) ? 1 : 0, UserHandle.USER_CURRENT) == 1;
+
+        if (!isScreenPortrait() && !navbarCanMove) {
+            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_search_panel_real_landscape, tmpRoot, false);
+        } else {
+            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_search_panel, tmpRoot, false);
+        }
+
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
@@ -1143,6 +1158,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
+
+    private boolean isScreenPortrait() {
+        return mContext.getResources()
+            .getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+    }
+
     Runnable mKillTask = new Runnable() {
         public void run() {
             final Intent intent = new Intent(Intent.ACTION_MAIN);

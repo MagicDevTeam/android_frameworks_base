@@ -51,4 +51,15 @@ public class ButtonsConstants {
     public static final String SYSTEM_ICON_IDENTIFIER = "system_shortcut=";
     public static final String ACTION_DELIMITER = "|";
 
+    public static final String NAVIGATION_CONFIG_DEFAULT =
+          ACTION_BACK    + ACTION_DELIMITER
+        + ACTION_NULL    + ACTION_DELIMITER
+        + ICON_EMPTY     + ACTION_DELIMITER
+        + ACTION_HOME    + ACTION_DELIMITER
+        + ACTION_NULL    + ACTION_DELIMITER
+        + ICON_EMPTY     + ACTION_DELIMITER
+        + ACTION_RECENTS + ACTION_DELIMITER
+        + ACTION_NULL    + ACTION_DELIMITER
+        + ICON_EMPTY;
+
 }

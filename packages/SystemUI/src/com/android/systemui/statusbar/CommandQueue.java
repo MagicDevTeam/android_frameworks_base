@@ -93,7 +93,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
-        public void animateExpandSettingsPanel();
+        public void animateExpandSettingsPanel(boolean flip);
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
@@ -178,7 +178,7 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void animateExpandSettingsPanel() {
+    public void animateExpandSettingsPanel(boolean flip) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_EXPAND_SETTINGS);
             mHandler.sendEmptyMessage(MSG_EXPAND_SETTINGS);
@@ -341,7 +341,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.animateCollapsePanels(0);
                     break;
                 case MSG_EXPAND_SETTINGS:
-                    mCallbacks.animateExpandSettingsPanel();
+                    mCallbacks.animateExpandSettingsPanel(true);
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
                     mCallbacks.setSystemUiVisibility(msg.arg1, msg.arg2);

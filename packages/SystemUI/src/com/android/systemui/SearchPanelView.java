@@ -145,6 +145,12 @@ public class SearchPanelView extends FrameLayout implements
 
         public void onFinishFinalAnimation() {
         }
+
+        @Override
+        public void onTargetChange(View arg0, int arg1) {
+            // TODO Auto-generated method stub
+            
+        }
     }
     final GlowPadTriggerListener mGlowPadViewListener = new GlowPadTriggerListener();
 

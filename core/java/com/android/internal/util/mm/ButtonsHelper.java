@@ -42,6 +42,45 @@ public class ButtonsHelper {
     private static final String SYSTEMUI_METADATA_NAME = "com.android.systemui";
     private static final String SETTINGS_METADATA_NAME = "com.android.settings";
 
+    // get and set the navbar configs from provider and return propper arraylist objects
+    // @ButtonConfig
+    public static ArrayList<ButtonConfig> getNavBarConfig(Context context) {
+        return (ConfigSplitHelper.getButtonsConfigValues(context,
+            getNavBarProvider(context), null, null, false));
+    }
+
+    // get @ButtonConfig with description if needed and other then an app description
+    public static ArrayList<ButtonConfig> getNavBarConfigWithDescription(
+            Context context, String values, String entries) {
+        return (ConfigSplitHelper.getButtonsConfigValues(context,
+            getNavBarProvider(context), values, entries, false));
+    }
+
+    private static String getNavBarProvider(Context context) {
+        String config = Settings.System.getStringForUser(
+                    context.getContentResolver(),
+                    Settings.System.NAVIGATION_BAR_CONFIG,
+                    UserHandle.USER_CURRENT);
+        if (config == null) {
+            config = ButtonsConstants.NAVIGATION_CONFIG_DEFAULT;
+        }
+        return config;
+    }
+
+    public static void setNavBarConfig(Context context,
+            ArrayList<ButtonConfig> buttonsConfig, boolean reset) {
+        String config;
+        if (reset) {
+            config = ButtonsConstants.NAVIGATION_CONFIG_DEFAULT;
+        } else {
+            config = ConfigSplitHelper.setButtonsConfig(buttonsConfig, false);
+        }
+        Settings.System.putString(context.getContentResolver(),
+                    Settings.System.NAVIGATION_BAR_CONFIG,
+                    config);
+    }
+
+
     public static Drawable getButtonIconImage(Context context,
             String clickAction, String customIcon) {
         int resId = -1;
@@ -161,9 +200,6 @@ public class ButtonsHelper {
             resId = systemUiResources.getIdentifier(
                         SYSTEMUI_METADATA_NAME + ":drawable/ic_sysbar_null", null, null);
         }
-        
-        Log.d(TAG, String.format("get resID->%d", resId));
-        
         return resId;
     }
 

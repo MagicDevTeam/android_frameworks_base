@@ -77,6 +77,20 @@ public class DeviceUtils {
                     || tm.getLteOnGsmMode() != 0;
     }
 
+    public static boolean deviceSupportsTorch(Context context) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            List<ApplicationInfo> packages = pm.getInstalledApplications(0);
+                for (ApplicationInfo packageInfo : packages) {
+                    if (packageInfo.packageName.equals(TorchConstants.APP_PACKAGE_NAME)) {
+                        return true;
+                    }
+                }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
     public static FilteredDeviceFeaturesArray filterUnsupportedDeviceFeatures(Context context,
             String[] valuesArray, String[] entriesArray) {
         if (valuesArray == null || entriesArray == null || context == null) {
@@ -101,6 +115,9 @@ public class DeviceUtils {
     }
 
     private static boolean isSupportedFeature(Context context, String action) {
+        if (action.equals(ButtonsConstants.ACTION_TORCH) && !deviceSupportsTorch(context)) {
+            return false;
+        }
         return true;
     }
 

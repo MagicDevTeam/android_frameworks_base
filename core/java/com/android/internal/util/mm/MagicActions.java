@@ -103,9 +103,8 @@ public class MagicActions {
                 pm.goToSleep(SystemClock.uptimeMillis());
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_TORCH)) {
-                /*
-                 * TODO: torch 
-                 */
+                Intent i = new Intent(TorchConstants.ACTION_TOGGLE_STATE);
+                context.sendBroadcast(i);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_IME)) {
                 if (isKeyguardShowing) {
