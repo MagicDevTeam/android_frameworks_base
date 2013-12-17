@@ -58,4 +58,10 @@
         intercept an outgoing SMS.
         Malicious apps may use this to prevent outgoing SMS messages.</string>
 
+    <!-- status message in phone options dialog for when expanded desktop is on -->
+    <string name="global_actions_expanded_desktop_mode_on_status">Expanded desktop is ON</string>
+
+    <!-- status message in phone options dialog for when expanded desktop is off -->
+    <string name="global_actions_expanded_desktop_mode_off_status">Expanded desktop is OFF</string>
+
 </resources>
