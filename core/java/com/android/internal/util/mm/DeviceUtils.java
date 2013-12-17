@@ -29,6 +29,9 @@ import android.util.DisplayMetrics;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 import android.util.Log;
+import android.net.ConnectivityManager;
+import android.os.Vibrator;
+
 
 import com.android.internal.telephony.PhoneConstants;
 
@@ -77,6 +80,20 @@ public class DeviceUtils {
                     || tm.getLteOnGsmMode() != 0;
     }
 
+    public static boolean deviceSupportsGps(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+    }
+
+    public static boolean deviceSupportsImeSwitcher(Context ctx) {
+        Resources res = ctx.getResources();
+        return res.getBoolean(com.android.internal.R.bool.config_show_IMESwitcher);
+    }
+
+    public static boolean deviceSupportsVibrator(Context ctx) {
+        Vibrator vibrator = (Vibrator) ctx.getSystemService(Context.VIBRATOR_SERVICE);
+        return vibrator.hasVibrator();
+    }
+
     public static boolean deviceSupportsTorch(Context context) {
         PackageManager pm = context.getPackageManager();
         try {
@@ -115,7 +132,12 @@ public class DeviceUtils {
     }
 
     private static boolean isSupportedFeature(Context context, String action) {
-        if (action.equals(ButtonsConstants.ACTION_TORCH) && !deviceSupportsTorch(context)) {
+        if (action.equals(ButtonsConstants.ACTION_TORCH)
+                        && !deviceSupportsTorch(context)
+                || action.equals(ButtonsConstants.ACTION_VIB)
+                        && !deviceSupportsVibrator(context)
+                || action.equals(ButtonsConstants.ACTION_VIB_SILENT)
+                        && !deviceSupportsVibrator(context)) {
             return false;
         }
         return true;

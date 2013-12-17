@@ -122,7 +122,10 @@ public class ButtonsHelper {
         } else if (customIcon != null && !customIcon.equals(ButtonsConstants.ICON_EMPTY)) {
             File f = new File(Uri.parse(customIcon).getPath());
             if (f.exists()) {
-                return new BitmapDrawable(context.getResources(), f.getAbsolutePath());
+                return new BitmapDrawable(context.getResources(),
+                    ImageHelper.getRoundedCornerBitmap(
+                        new BitmapDrawable(context.getResources(),
+                        f.getAbsolutePath()).getBitmap()));
             } else {
                 Log.e("ButtonsHelper:", "can't access custom icon image");
                 return null;

@@ -77,7 +77,7 @@ import java.util.UUID;
 import com.android.internal.util.mm.PolicyConstants;
 import com.android.internal.util.mm.PolicyHelper;
 import com.android.internal.util.mm.ButtonConfig;
-import com.android.internal.util.mm.ColorHelper;
+import com.android.internal.util.mm.ImageHelper;
 import com.android.internal.util.mm.MagicActions;
 
 /**
@@ -956,8 +956,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 if (colorMode != 3) {
                     ImageView icon = (ImageView) itemView.findViewById(ICON_IDS[i]);
                     if (icon != null) {
-                        icon.setImageDrawable(ColorHelper.resize(mContext, new BitmapDrawable(
-                            ColorHelper.getColoredBitmap(icon.getDrawable(), iconColor)), 35));
+                        icon.setImageDrawable(ImageHelper.resize(mContext, new BitmapDrawable(
+                            ImageHelper.getColoredBitmap(icon.getDrawable(), iconColor)), 35));
                     }
                 }
                 itemView.setOnClickListener(this);
