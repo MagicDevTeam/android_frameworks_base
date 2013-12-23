@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2013 SlimRoms Project
+* Copyright (C) 2013 MagicMod Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -32,11 +33,11 @@ import android.util.Log;
 import android.net.ConnectivityManager;
 import android.os.Vibrator;
 
-
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DeviceUtils {
 
@@ -174,6 +175,10 @@ public class DeviceUtils {
 
     public static boolean isTablet(Context con) {
         return getScreenType(con) == DEVICE_TABLET;
+    }
+
+    public static boolean isLocale(Locale locale){
+        return Resources.getSystem().getConfiguration().locale.equals(locale);
     }
 
 }
