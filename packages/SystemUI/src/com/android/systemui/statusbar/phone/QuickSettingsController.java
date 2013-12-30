@@ -152,9 +152,6 @@ public class QuickSettingsController {
     }
 
     void loadTiles() {
-        // Reset reference tiles
-        mIMETile = null;
-
         // Filter items not compatible with device
         boolean bluetoothSupported = DeviceUtils.deviceSupportsBluetooth();
         boolean mobileDataSupported = DeviceUtils.deviceSupportsMobileData(mContext);
@@ -261,6 +258,9 @@ public class QuickSettingsController {
             dynamicTiles = TextUtils.join(TILE_DELIMITER, DYNAMIC_TILES_DEFAULT);
         }
 
+        // Reset reference tiles
+        mIMETile = null;
+
         // Split out the tile names and add to the list
         for (String tile : dynamicTiles.split("\\|")) {
             QuickSettingsTile qs = null;
@@ -271,6 +271,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_IMESWITCHER)
                     && DeviceUtils.deviceSupportsImeSwitcher(mContext)) {
                 qs = new InputMethodTile(mContext, this);
+                mIMETile = (InputMethodTile) qs;
             } else if (tile.equals(TILE_USBTETHER)
                     && DeviceUtils.deviceSupportsUsbTether(mContext)) {
                 qs = new UsbTetherTile(mContext, this);
