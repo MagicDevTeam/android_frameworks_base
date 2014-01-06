@@ -3192,6 +3192,14 @@ public final class Settings {
         public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
 
         /**
+         * Whether flip action during incomming call should mute or dismiss
+         * the call (mute = 0, dismiss = 1, nothing = 2 (default))
+         *
+         * @hide
+         */
+        public static final String CALL_FLIP_ACTION_KEY = "call_flip_action_key";
+
+        /**
          * Enable Stylus Gestures
          *
          * @hide
