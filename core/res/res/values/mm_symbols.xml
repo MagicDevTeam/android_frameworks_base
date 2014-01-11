@@ -77,4 +77,7 @@
   <java-symbol type="string" name="second" />
   <java-symbol type="string" name="seconds" />
 
+  <!-- Force permanent menu key -->
+  <java-symbol type="bool" name="config_force_permanent_menu_key" />
+
 </resources>
