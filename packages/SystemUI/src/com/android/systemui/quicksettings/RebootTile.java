@@ -39,6 +39,7 @@ public class RebootTile extends QuickSettingsTile {
             public void onClick(View v) {
                 mRebootToRecovery = !mRebootToRecovery;
                 updateResources();
+                flipTile(0);
             }
         };
 

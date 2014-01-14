@@ -56,6 +56,7 @@ public class BluetoothTile extends QuickSettingsTile implements BluetoothStateCh
                 }else{
                     mBluetoothAdapter.enable();
                 }
+                flipTile(0);
             }
         };
 

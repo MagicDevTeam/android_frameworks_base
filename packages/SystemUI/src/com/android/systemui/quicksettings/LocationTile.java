@@ -52,6 +52,7 @@ public class LocationTile extends QuickSettingsTile implements LocationSettingsC
             @Override
             public void onClick(View v) {
                 mLocationController.setLocationEnabled(!mLocationEnabled);
+                flipTile(0);
                 if (!mLocationEnabled) {
                     qsc.mBar.collapseAllPanels(true);
                 }

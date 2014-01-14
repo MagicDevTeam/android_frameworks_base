@@ -54,6 +54,7 @@ public class InputMethodTile extends QuickSettingsTile {
             @Override
             public void onClick(View v) {
                 try {
+                    flipTile(0);
                     mQsc.mBar.collapseAllPanels(true);
                     Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
                     PendingIntent pendingIntent =

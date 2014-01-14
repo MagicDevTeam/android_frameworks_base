@@ -70,6 +70,7 @@ public class MobileNetworkTile extends NetworkTile {
                     updateOverlayImage(DISABLED_OVERLAY);
                     mCm.setMobileDataEnabled(false);
                 }
+                flipTile(0);
             }
         };
 

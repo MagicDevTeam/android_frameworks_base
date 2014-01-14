@@ -43,6 +43,7 @@ public class BrightnessTile extends QuickSettingsTile implements BrightnessState
         mOnClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
+                flipTile(0);
                 qsc.mBar.collapseAllPanels(true);
                 showBrightnessDialog();
             }

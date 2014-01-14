@@ -53,6 +53,7 @@ public class BugReportTile extends QuickSettingsTile{
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                flipTile(0);
                 mQsc.mBar.collapseAllPanels(true);
                 showBugreportDialog();
             }
