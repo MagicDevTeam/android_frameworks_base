@@ -26,7 +26,7 @@ public class CosTypedArray extends TypedArray
 
     private CharSequence loadStringValueAt(int index) {
         CharSequence cs = null;
-        if (this.mIsCosResources) {
+        if (mIsCosResources) {
             if (this.mData[index] == 3) {
                 int type = this.mData[(index + 3)];
                 cs = ((CosResources)getResources()).getThemeCharSequence(type);

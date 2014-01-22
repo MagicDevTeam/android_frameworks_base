@@ -43,18 +43,22 @@ public final class CosResources extends Resources {
     public static final boolean DBG = ThemeResources.DEBUG_THEMES;
     public static final String TAG = "CosResources";
 
-    public static final int sCookieTypeFramework = 1;
-    public static final int sCookieTypeMiui = 2;
-    public static final int sCookieTypeOther = 3;
-    private SparseArray<CharSequence> mCharSequences = new SparseArray();
-    private SparseIntArray mCookieType = new SparseIntArray();
-    private boolean mHasValues;
-    private SparseArray<Integer> mIntegers = new SparseArray();
-    private SparseArray<Boolean> mSkipFiles = new SparseArray();
+    public static final int COOKIE_TYPE_FRAMEWORK = 1;
+    public static final int COOKIE_TYPE_MIUI = 2;
+    public static final int COOKIE_TYPE_OTHER = 3;
+
     private ThemeResources mThemeResources;
     private boolean mIsThemeCompatibilityModeEnabled = false;
 
+    private boolean mHasValues;
+
+    private SparseIntArray mCookieType;
+    private SparseArray<Boolean> mSkipFiles;
+    private SparseArray<Integer> mIntegers;
+    private SparseArray<CharSequence> mCharSequences;
+
     CosResources() {
+        super();
         init(null);
     }
 
@@ -69,19 +73,64 @@ public final class CosResources extends Resources {
         init(null);
     }
 
+    public void init(String packageName) {
+        init(packageName, false);
+    }
+
+    public void init(String packageName, boolean isThemeCompatibilityModeEnabled) {
+        if(TextUtils.isEmpty(packageName) || "android".equals(packageName) || "miui".equals(packageName)) {
+            mThemeResources = ThemeResources.getSystem(this);
+        } else {
+            if (DBG)
+                Log.d(TAG, String.format("Getting ThemeResourcesPackages.getThemeResources() for %s", packageName));
+            mThemeResources = ThemeResourcesPackage.getThemeResources(this, packageName);
+        }
+        mHasValues = mThemeResources.hasValues();
+        mIsThemeCompatibilityModeEnabled = isThemeCompatibilityModeEnabled;
+        mCookieType = new SparseIntArray();
+        mSkipFiles = new SparseArray();
+        mIntegers = new SparseArray();
+        mCharSequences = new SparseArray();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateConfiguration(Configuration config, DisplayMetrics metrics, CompatibilityInfo compat) {
+        Configuration currentConfig = getConfiguration();
+        int configChanges;
+        if(currentConfig != null && config != null)
+            configChanges = currentConfig.diff(config);
+        else
+            configChanges = 0;
+        super.updateConfiguration(config, metrics, compat);
+        if(mThemeResources != null && ((configChanges & 0x200) != 0
+                || ExtraConfiguration.needNewResources(configChanges))) {
+            ThemeResources.getSystem().checkUpdate();
+            mIntegers.clear();
+            mCharSequences.clear();
+            mSkipFiles.clear();
+            mThemeResources.checkUpdate();
+            mHasValues = mThemeResources.hasValues();
+            sPreloadedColorStateLists.clear();
+            sPreloadedColorDrawables.clear();
+        }
+    }
+
     private int getCookieType(int cookie) {
         int type = mCookieType.get(cookie);
         if (DBG)
             Log.d(TAG, String.format("getCookieType(%d) - %d", cookie, type));
         if(type == 0) {
             String name = mAssets.getCookieName(cookie);
-            Log.d(TAG, String.format("cookie name=%s", name));
+            if (DBG) Log.d(TAG, String.format("cookie name=%s", name));
             if("/system/framework/framework-res.apk".equals(name))
-                type = sCookieTypeFramework;
+                type = COOKIE_TYPE_FRAMEWORK;
             else if("/system/framework/framework-miui-res.apk".equals(name))
-                type = sCookieTypeMiui;
+                type = COOKIE_TYPE_MIUI;
             else
-                type = sCookieTypeOther;
+                type = COOKIE_TYPE_OTHER;
             mCookieType.put(cookie, type);
         }
         return type;
@@ -92,18 +141,52 @@ public final class CosResources extends Resources {
             int data[] = array.mData;
             int index = 0;
             while(index < data.length)  {
-                int type = data[index + 0];
+                int type = data[index];
                 int id = data[index + 3];
-                if((type >= TypedValue.TYPE_FIRST_INT && 
+                if((type >= TypedValue.TYPE_FIRST_INT &&
                         type <= TypedValue.TYPE_LAST_INT) || type == TypedValue.TYPE_DIMENSION) {
                     Integer themeInteger = getThemeInt(id);
                     if(themeInteger != null)
-                        data[index + 1] = themeInteger.intValue();
+                        data[index + 1] = themeInteger;
                 }
                 index += 6;
             }
         }
         return array;
+    }
+
+    Integer getThemeInt(int id) {
+        Integer value = null;
+        if(mHasValues) {
+            int index = mIntegers.indexOfKey(id);
+            if(index >= 0) {
+                value = mIntegers.valueAt(index);
+            } else {
+                if (id > 0) {
+                    String name = getResourceEntryName(id);
+                    value = mThemeResources.getThemeInt(name);
+                    if (DBG)
+                        Log.i(TAG, "getThemeInt(0x" + Integer.toHexString(id) + "): " + name + ", " + value);
+                    if (value != null)
+                        mIntegers.put(id, value);
+                }
+            }
+        }
+        return value;
+    }
+
+    @Override
+    public void getValue(int id, TypedValue outValue, boolean resolveRefs)
+            throws Resources.NotFoundException {
+        super.getValue(id, outValue, resolveRefs);
+        if (mIsThemeCompatibilityModeEnabled)
+            return;
+        if((outValue.type >= TypedValue.TYPE_FIRST_INT && outValue.type <= TypedValue.TYPE_LAST_INT)
+                || outValue.type == TypedValue.TYPE_DIMENSION) {
+            Integer integer = getThemeInt(id);
+            if(integer != null)
+                outValue.data = integer;
+        }
     }
 
     public CharSequence getText(int id)
@@ -126,7 +209,7 @@ public final class CosResources extends Resources {
         if(mHasValues) {
             int index = mCharSequences.indexOfKey(id);
             if(index >= 0) {
-                value = (CharSequence)mCharSequences.valueAt(index);
+                value = mCharSequences.valueAt(index);
             } else {
                 if (id > 0) {
                     String name = getResourceEntryName(id);
@@ -141,62 +224,44 @@ public final class CosResources extends Resources {
         return value;
     }
 
-    Integer getThemeInt(int id) {
-        Integer value = null;
-        if(mHasValues) {
-            int index = mIntegers.indexOfKey(id);
-            if(index >= 0) {
-                value = (Integer)mIntegers.valueAt(index);
-            } else {
-                if (id > 0) {
-                    String name = getResourceEntryName(id);
-                    value = mThemeResources.getThemeInt(name);
-                    if (DBG)
-                        Log.i(TAG, "getThemeInt(0x" + Integer.toHexString(id) + "): " + name + ", " + value);
-                    if (value != null)
-                        mIntegers.put(id, value);
-                }
-            }
-        }
-        return value;
+    @Override
+    public final Resources.Theme newTheme() {
+        return new CosTheme();
     }
 
-    public void getValue(int id, TypedValue outValue, boolean resolveRefs)
+    @Override
+    public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
+        return replaceTypedArray(super.obtainAttributes(set, attrs));
+    }
+
+    @Override
+    public TypedArray obtainTypedArray(int id)
             throws Resources.NotFoundException {
-        super.getValue(id, outValue, resolveRefs);
-        if (mIsThemeCompatibilityModeEnabled)
-            return;
-        if((outValue.type >= TypedValue.TYPE_FIRST_INT && outValue.type <= TypedValue.TYPE_LAST_INT)
-                || outValue.type == TypedValue.TYPE_DIMENSION) {
-            Integer integer = getThemeInt(id);
-            if(integer != null)
-                outValue.data = integer.intValue();
-        }
+        return replaceTypedArray(super.obtainTypedArray(id));
     }
 
-    public void init(String packageName) {
-        if(TextUtils.isEmpty(packageName) || "android".equals(packageName) || "miui".equals(packageName)) {
-            mThemeResources = ThemeResources.getSystem(this);
-        } else {
-            if (DBG)
-                Log.d(TAG, String.format("Getting ThemeResourcesPackages.getThemeResources() for %s", packageName));
-            mThemeResources = ThemeResourcesPackage.getThemeResources(this, packageName);
-        }
-        mHasValues = mThemeResources.hasValues();
+    @Override
+    public InputStream openRawResource(int id, TypedValue value)
+            throws Resources.NotFoundException {
+        if (DBG) Log.d(TAG, String.format("openRawResource(%d, %d)", id, value.type));
+        if(mSkipFiles.get(id) != null)
+            return super.openRawResource(id, value);
+
+        ThemeZipFile.ThemeFileInfo info;
+        getValue(id, value, true);
+        String file = value.string.toString();
+        info = mThemeResources.getThemeFileStream(getCookieType(value.assetCookie), file);
+        InputStream is;
+        if(info == null) {
+            mSkipFiles.put(id, true);
+            is = super.openRawResource(id, value);
+        } else
+            is = info.mInput;
+
+        return is;
     }
 
-    public void init(String packageName, boolean isThemeCompatibilityModeEnabled) {
-        if(TextUtils.isEmpty(packageName) || "android".equals(packageName) || "miui".equals(packageName)) {
-            mThemeResources = ThemeResources.getSystem(this);
-        } else {
-            if (DBG)
-                Log.d(TAG, String.format("Getting ThemeResourcesPackages.getThemeResources() for %s", packageName));
-            mThemeResources = ThemeResourcesPackage.getThemeResources(this, packageName);
-        }
-        mHasValues = mThemeResources.hasValues();
-        mIsThemeCompatibilityModeEnabled = isThemeCompatibilityModeEnabled;
-    }
-
+    @Override
     Drawable loadOverlayDrawable(TypedValue value, int id) {
         if (DBG) Log.d(TAG, String.format("loadOverlayDrawable(%d, %d)", value.type, id));
         if(mSkipFiles.get(id) != null && mSkipFiles.get(id).equals(Boolean.TRUE) || mIsThemeCompatibilityModeEnabled)
@@ -226,7 +291,7 @@ public final class CosResources extends Resources {
             } else {
                 if (DBG)
                     Log.d(TAG, "loadOverlayDrawable: info was null for " + file);
-                mSkipFiles.put(id, Boolean.valueOf(true));
+                mSkipFiles.put(id, true);
             }
         } catch (IOException e) {
             drawable = null;
@@ -235,66 +300,14 @@ public final class CosResources extends Resources {
         return drawable;
     }
 
-    public final Resources.Theme newTheme() {
-        return new CosTheme();
-    }
-
-    public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
-        return replaceTypedArray(super.obtainAttributes(set, attrs));
-    }
-
-    public TypedArray obtainTypedArray(int id)
-            throws Resources.NotFoundException {
-        return replaceTypedArray(super.obtainTypedArray(id));
-    }
-
-    public InputStream openRawResource(int id, TypedValue value)
-            throws Resources.NotFoundException {
-        if (DBG) Log.d(TAG, String.format("openRawResource(%d, %d)", id, value.type));
-        InputStream is = null;
-        if(mSkipFiles.get(id) != null) 
-            return super.openRawResource(id, value);
-
-        ThemeZipFile.ThemeFileInfo info;
-        getValue(id, value, true);
-        String file = value.string.toString();
-        info = mThemeResources.getThemeFileStream(getCookieType(value.assetCookie), file);
-        if(info == null) {
-            mSkipFiles.put(id, Boolean.valueOf(true));
-            is = super.openRawResource(id, value);
-        } else
-            is = info.mInput;
-
-        return is;
-    }
-
-    public void updateConfiguration(Configuration config, DisplayMetrics metrics, CompatibilityInfo compat) {
-        Configuration currentConfig = getConfiguration();
-        int configChanges;
-        if(currentConfig != null && config != null)
-            configChanges = currentConfig.diff(config);
-        else
-            configChanges = 0;
-        super.updateConfiguration(config, metrics, compat);
-        if(mThemeResources != null && ((configChanges & 0x200) != 0
-                || ExtraConfiguration.needNewResources(configChanges))) {
-            if(ThemeResources.getSystem().checkUpdate())
-                Resources.clearPreloadedCache();
-            mIntegers.clear();
-            mCharSequences.clear();
-            mSkipFiles.clear();
-            mThemeResources.checkUpdate();
-            mHasValues = mThemeResources.hasValues();
-        }
-    }
-
     public final class CosTheme extends Resources.Theme {
         public CosTheme() {
             super();
         }
 
+
         public TypedArray obtainStyledAttributes(int resid, int[] attrs)
-            throws Resources.NotFoundException {
+                throws Resources.NotFoundException {
             return CosResources.this.replaceTypedArray(super.obtainStyledAttributes(resid, attrs));
         }
 
