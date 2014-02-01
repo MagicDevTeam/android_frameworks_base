@@ -1025,6 +1025,8 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+            MOVED_TO_SECURE.add(Secure.LOCK_BEFORE_UNLOCK);
+            MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_SIZE);
             MOVED_TO_SECURE.add(Secure.LOGGING_ID);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_ENABLED);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_LAST_UPDATE);
@@ -2549,6 +2551,31 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_DISABLED = "lockscreen.disabled";
 
+         /**
+         * Whether to show the camera widget on lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_CAMERA_WIDGET = "lockscreen_camera_widget";
+
+        /**
+         * Whether to hide the lockscreen gadgets glowing hints
+         * @hide
+         */
+        public static final String LOCKSCREEN_DISABLE_HINTS = "lockscreen_disable_hints";
+
+        /**
+         * Whether to minimize lockscreen challenge on screen turned on
+         * @hide
+         */
+        public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
+
+        /**
+         * Whether to use the carousel as widget container on portrait view
+         * @hide
+         */
+        public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL =
+                "lockscreen_use_widget_container_carousel";
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
@@ -3149,6 +3176,12 @@ public final class Settings {
          * @hide
          */
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
+
+         /**
+         * Whether to use the custom quick unlock screen control
+         * @hide
+         */
+        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4154,6 +4187,48 @@ public final class Settings {
          * Whether lock pattern is visible as user enters (0 = false, 1 = true)
          */
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
+
+         /**
+         * Colorize custom lock icon true/false
+         * @hide
+         */
+        public static final String LOCKSCREEN_COLORIZE_LOCK = "lockscreen_colorize_lock";
+
+        /**
+         * Lockscreen custom lock icon
+         * @hide
+         */
+        public static final String LOCKSCREEN_LOCK_ICON = "lockscreen_lock_icon";
+
+        /**
+         * Lockscreen lock color (handle and expanded locks)
+         * @hide
+         */
+        public static final String LOCKSCREEN_LOCK_COLOR = "lockscreen_lock_color";
+
+        /**
+         * Lockscreen dots color (glowpad dots)
+         * @hide
+         */
+        public static final String LOCKSCREEN_DOTS_COLOR = "lockscreen_dots_color";
+
+        /**
+         * Lockscreen frame color (widgets/security frame color)
+         * @hide
+         */
+        public static final String LOCKSCREEN_FRAME_COLOR = "lockscreen_frame_color";
+
+         /**
+         *Whether lock before unlock is enabled or disabled
+         * @hide
+         */
+        public static final String LOCK_BEFORE_UNLOCK = "lock_before_unlock";
+
+        /**
+         * Determines the width and height of the LockPatternView widget
+         * @hide
+         */
+        public static final String LOCK_PATTERN_SIZE = "lock_pattern_size";
 
         /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =

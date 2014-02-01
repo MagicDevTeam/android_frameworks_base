@@ -16,19 +16,21 @@
 package com.android.keyguard;
 
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.PowerManager;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -39,6 +41,8 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
+
+import java.io.File;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
@@ -155,13 +159,68 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        int lockColor = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_LOCK_COLOR, -2,
+                UserHandle.USER_CURRENT);
+
+        int dotColor = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_DOTS_COLOR, -2,
+                UserHandle.USER_CURRENT);
+
+        String lockIcon = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_LOCK_ICON,
+                UserHandle.USER_CURRENT);
+
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
+
+        Bitmap lock = null;
+
+        if (lockIcon != null && lockIcon.length() > 0) {
+            File f = new File(lockIcon);
+            if (f.exists()) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                lock = BitmapFactory.decodeFile(lockIcon, options);
+
+                if (Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.LOCKSCREEN_COLORIZE_LOCK, 0,
+                        UserHandle.USER_CURRENT) == 0) {
+                    lockColor = -2;
+                }
+            }
+        }
+
+        mGlowPadView.setColoredIcons(lockColor, dotColor, lock);
+
         updateTargets();
 
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         View bouncerFrameView = findViewById(R.id.keyguard_selector_view_frame);
-        mBouncerFrame = bouncerFrameView.getBackground();
+        mBouncerFrame =
+                KeyguardSecurityViewHelper.colorizeFrame(
+                mContext, bouncerFrameView.getBackground());
+
+        final boolean lockBeforeUnlock = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCK_BEFORE_UNLOCK, 0,
+                UserHandle.USER_CURRENT) == 1;
+
+        // bring emergency button on slider lockscreen
+        // to front when lockBeforeUnlock is enabled
+        // to make it clickable
+        if (mLockPatternUtils != null && mLockPatternUtils.isSecure() && lockBeforeUnlock) {
+            LinearLayout ecaContainer =
+                (LinearLayout) findViewById(R.id.keyguard_selector_fade_container);
+            if (ecaContainer != null) {
+                ecaContainer.bringToFront();
+            }
+        }
     }
 
     public void setCarrierArea(View carrierArea) {
