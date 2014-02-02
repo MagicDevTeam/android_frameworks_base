@@ -372,9 +372,37 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
         super.setLayoutDirection(layoutDirection);
     }
 
+<<<<<<< HEAD
     // used for lockscreen notifications
     public View getNotifsButton() {
         return mCurrentView.findViewById(R.id.show_notifs);
+=======
+    public void updateResources() {
+        getIcons(mContext.getResources());
+        for (int i = 0; i < mRotatedViews.length; i++) {
+            ViewGroup container = (ViewGroup) mRotatedViews[i];
+            if (container != null) {
+                updateKeyButtonViewResources(container);
+            }
+        }
+    }
+
+    private void updateKeyButtonViewResources(ViewGroup container) {
+        ViewGroup midNavButtons = (ViewGroup) container.findViewById(R.id.mid_nav_buttons);
+        if (midNavButtons != null) {
+            final int nChildern = midNavButtons.getChildCount();
+            for (int i = 0; i < nChildern; i++) {
+                final View child = midNavButtons.getChildAt(i);
+                if (child instanceof KeyButtonView) {
+                    ((KeyButtonView) child).updateResources();
+                }
+            }
+        }
+        KeyButtonView kbv = (KeyButtonView) findViewById(R.id.six);
+        if (kbv != null) {
+            kbv.updateResources();
+        }
+>>>>>>> 34d6168... New Theme Engine [1/6]
     }
 
     public void notifyScreenOn(boolean screenOn) {

@@ -26,7 +26,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
+<<<<<<< HEAD
+=======
+import android.content.res.CustomTheme;
+import android.database.ContentObserver;
+>>>>>>> 34d6168... New Theme Engine [1/6]
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -361,6 +367,7 @@ class ServerThread {
         AssetAtlasService atlas = null;
         PrintManagerService printManager = null;
         MediaRouterService mediaRouter = null;
+        ThemeService themeService = null;
         EdgeGestureService edgeGestureService = null;
 
         // Bring up services needed for UI.
@@ -811,6 +818,13 @@ class ServerThread {
                 reportWtf("starting Print Service", e);
             }
 
+            try {
+                Slog.i(TAG, "Theme Service");
+                themeService = new ThemeService(context);
+                ServiceManager.addService(Context.THEME_SERVICE, themeService);
+            } catch (Throwable e) {
+                reportWtf("starting Theme Service", e);
+            }
             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "Media Router Service");
@@ -821,6 +835,10 @@ class ServerThread {
                 }
             }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 34d6168... New Theme Engine [1/6]
             try {
                 Slog.i(TAG, "EdgeGesture service");
                 edgeGestureService = new EdgeGestureService(context, inputManager);
@@ -932,6 +950,7 @@ class ServerThread {
         filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE_RESET);
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(ThemeUtils.ACTION_THEME_CHANGED);
         filter.addCategory(Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE);
         filter.addDataScheme("package");
         context.registerReceiver(new AppsLaunchFailureReceiver(), filter);
@@ -964,6 +983,7 @@ class ServerThread {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
+        final IPackageManager pmf = pm;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1117,6 +1137,15 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("Notifying MediaRouterService running", e);
                 }
+
+                try {
+                    CustomTheme customTheme = CustomTheme.getBootTheme(contextF.getContentResolver());
+                    String iconPkg = customTheme.getIconPackPkgName();
+                    pmf.updateIconMapping(iconPkg);
+                } catch (Throwable e) {
+                    reportWtf("Icon Mapping failed", e);
+                }
+
             }
         });
 

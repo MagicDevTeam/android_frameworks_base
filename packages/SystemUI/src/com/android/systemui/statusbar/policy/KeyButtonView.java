@@ -54,7 +54,11 @@ public class KeyButtonView extends ImageView {
     String mLongpressAction;
     int mTouchSlop;
     Drawable mGlowBG;
+<<<<<<< HEAD
     int mGlowBGColor;
+=======
+    int mGlowBgId;
+>>>>>>> 34d6168... New Theme Engine [1/6]
     int mGlowWidth, mGlowHeight;
     float mGlowAlpha = 0f, mGlowScale = 1f;
     @ViewDebug.ExportedProperty(category = "drawing")
@@ -94,6 +98,7 @@ public class KeyButtonView extends ImageView {
 
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
+        mGlowBgId = a.getResourceId(R.styleable.KeyButtonView_glowBackground, 0);
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         setDrawingAlpha(mQuiescentAlpha);
         if (mGlowBG != null) {
@@ -107,6 +112,7 @@ public class KeyButtonView extends ImageView {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
+<<<<<<< HEAD
     public void setClickAction(String action) {
         mClickAction = action;
         setOnClickListener(mClickListener);
@@ -138,6 +144,11 @@ public class KeyButtonView extends ImageView {
             mGlowBG.setColorFilter(null);
             mGlowBG.setColorFilter(mGlowBGColor, Mode.SRC_ATOP);
 
+=======
+    public void updateResources() {
+        if (mGlowBgId != 0) {
+            mGlowBG = mContext.getResources().getDrawable(mGlowBgId);
+>>>>>>> 34d6168... New Theme Engine [1/6]
         }
     }
 
