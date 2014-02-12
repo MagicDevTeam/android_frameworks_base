@@ -97,7 +97,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getLeftMenuButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getRightMenuButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), alpha, animate);
-
+        setKeyButtonViewQuiescentAlpha(mView.getNotifsButton(), alpha, animate);
         // apply to lights out
         applyLightsOut(mode == MODE_LIGHTS_OUT, animate, force);
     }
@@ -118,6 +118,7 @@ public final class NavigationBarTransitions extends BarTransitions {
 
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getSearchLight());
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getCameraButton());
+        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getNotifsButton());
 
         final View home = mView.getHomeButton();
         final View recent = mView.getRecentsButton();
@@ -152,6 +153,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     public void setContentVisible(boolean visible) {
         final float alpha = visible ? 1 : 0;
         fadeContent(mView.getCameraButton(), alpha);
+        fadeContent(mView.getNotifsButton(), alpha);
         fadeContent(mView.getSearchLight(), alpha);
     }
 
