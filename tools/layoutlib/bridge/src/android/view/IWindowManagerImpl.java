@@ -20,6 +20,7 @@ import android.graphics.Point;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
+import android.content.Intent;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -507,15 +508,18 @@ public class IWindowManagerImpl implements IWindowManager {
     /* @hide */
     @Override
     public boolean expandedDesktopHidesNavigationBar() {
+        return false;
     }
 
     /* @hide */
     @Override
     public boolean expandedDesktopHidesStatusBar() {
+        return false;
     }
 
     /* @hide */
     @Override
     public int getCurrentNavigationBarSize() {
+        return 0;
     }
 }
