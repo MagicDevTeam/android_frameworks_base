@@ -686,15 +686,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         updateShowSearchHoldoff();
 
-<<<<<<< HEAD
         if (!mRecreating) {
             if (mNavigationBarView == null) {
-=======
-        try {
-            boolean showNav = mWindowManagerService.hasNavigationBar();
-            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav && !mRecreating) {
->>>>>>> 664587a... SystemUI: Reinflate on theme change
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
             }
