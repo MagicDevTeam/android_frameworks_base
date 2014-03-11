@@ -1039,8 +1039,6 @@ public class AudioService extends IAudioService.Stub {
 
             oldIndex = streamState.getIndex(device);
 
-            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
-
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
                 (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
                 (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
@@ -1050,6 +1048,8 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             }
+
+            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
             if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
