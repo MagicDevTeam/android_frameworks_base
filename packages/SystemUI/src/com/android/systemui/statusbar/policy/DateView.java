@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.TextView;
 
+import com.android.internal.util.mm.DeviceUtils;
 import com.android.systemui.R;
 
 import java.text.SimpleDateFormat;
@@ -88,28 +89,43 @@ public class DateView extends TextView {
     }
 
     protected void updateClock() {
+        boolean isCN = (DeviceUtils.isLocale(Locale.CHINA) || DeviceUtils.isLocale(
+                Locale.CHINESE) || DeviceUtils.isLocale(Locale.TAIWAN));
         if (mDateFormat == null) {
             final String weekdayFormat = getContext().getString(R.string.system_ui_weekday_pattern);
-            final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
+            final String dateFormat = getContext().getString(isCN ? com.android.internal.R.string.system_ui_date_pattern : R.string.system_ui_date_pattern);
             final Locale l = Locale.getDefault();
             String weekdayFmt = ICU.getBestDateTimePattern(weekdayFormat, l.toString());
             String dateFmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
 
-            mDateFormat = new SimpleDateFormat(dateFmt, l);
-            mWeekdayFormat = new SimpleDateFormat(weekdayFmt, l);
+            if (isCN) {
+                final String fmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
+                mDateFormat = new SimpleDateFormat(fmt, l);
+            } else {
+                mDateFormat = new SimpleDateFormat(dateFmt, l);			
+                mWeekdayFormat = new SimpleDateFormat(weekdayFmt, l);
+            }
         }
 
         mCurrentTime.setTime(System.currentTimeMillis());
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(mWeekdayFormat.format(mCurrentTime));
-        builder.append("\n");
-        builder.append(mDateFormat.format(mCurrentTime));
+        if (isCN) {
+            final String text = mDateFormat.format(mCurrentTime);
+            if (!text.equals(mLastText)) {
+                setText(text);
+                mLastText = text;
+            }
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append(mWeekdayFormat.format(mCurrentTime));
+            builder.append("\n");
+            builder.append(mDateFormat.format(mCurrentTime));
 
-        final String text = builder.toString();
-        if (!text.equals(mLastText)) {
-            setText(text);
-            mLastText = text;
+            final String text = builder.toString();
+            if (!text.equals(mLastText)) {
+                setText(text);
+                mLastText = text;
+            }
         }
     }
 }
