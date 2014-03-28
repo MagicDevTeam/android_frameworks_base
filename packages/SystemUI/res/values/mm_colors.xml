@@ -61,4 +61,14 @@
    <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
 <!--    <color name="quick_settings_clock_text_color">#ff33b5e5</color>-->
 
+    <!-- Pie controls -->
+    <color name="pie_overlay_color">#ff000000</color>
+    <color name="pie_snap_color">#ffffffff</color>
+    <color name="pie_text_color">#ffffffff</color>
+    <color name="pie_foreground_color">#ffffffff</color>
+    <color name="pie_background_color">#ff000000</color>
+    <color name="pie_selected_color">#ff5c5c5c</color>
+    <color name="pie_long_pressed_color">#ff8c8c8c</color>
+    <color name="pie_outline_color">#ff5c5c5c</color>
+
 </resources>
