@@ -52,7 +52,6 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 
-import com.android.internal.util.mm.LockscreenBackgroundUtil;
 import com.android.internal.widget.ILockSettings;
 
 import java.net.URISyntaxException;
@@ -3350,14 +3349,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
-
-         /
-         * Sets the lockscreen background style. Integer.
-         * @see LockscreenBackgroundUtil#LOCKSCREEN_STYLE_DEFAULT
-         * @see LockscreenBackgroundUtil#LOCKSCREEN_STYLE_IMAGE
-         * @hide
-         */
-        public static final String LOCKSCREEN_BACKGROUND_STYLE = "lockscreen_background_style";
 
          /**
          * Enables/disables lockscreen notifications
