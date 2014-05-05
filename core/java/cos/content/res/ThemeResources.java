@@ -91,7 +91,7 @@ public class ThemeResources {
 
         sMiuiToChaosResourceMappings = new HashMap();
         Map<String, String> map = new HashMap();
-        /*map.put("status_bar_close_off.9.png", "status_bar_close_on.9.png");
+        map.put("status_bar_close_off.9.png", "status_bar_close_on.9.png");
         map.put("stat_2g3g_off.png", "status_bar_toggle_3g2g.png");
         map.put("stat_2g3g_on.png", "status_bar_toggle_3g2g.png");
         map.put("stat_3g_on.png", "status_bar_toggle_3g2g.png");
@@ -186,7 +186,7 @@ public class ThemeResources {
         map.put("notification_bg_low_normal.9.png", "notification_item_bg_n.9.png");
         map.put("notification_bg_pressed.9.png", "notification_item_bg_p.9.png");
         map.put("notification_bg_low_pressed.9.png", "notification_item_bg_p.9.png");
-        sMiuiToChaosResourceMappings.put("framework-res", map);*/
+        sMiuiToChaosResourceMappings.put("framework-res", map);
     }
 
     protected ThemeResources(ThemeResources wrapped, Resources resources, String componentName, MetaData metaData) {
