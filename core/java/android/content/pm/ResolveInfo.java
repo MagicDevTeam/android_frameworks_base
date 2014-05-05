@@ -17,9 +17,6 @@
 package android.content.pm;
 
 import android.content.ComponentName;
-import android.annotation.CosHook;
-import android.annotation.CosHook.CosHookType;
-import android.app.ThemeHelper;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -189,11 +186,10 @@ public class ResolveInfo implements Parcelable {
      * @return Returns a Drawable containing the resolution's icon.  If the
      * item does not have an icon, the default activity icon is returned.
      */
-    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Drawable loadIcon(PackageManager pm) {
         Drawable dr;
         if (resolvePackageName != null && icon != 0) {
-            dr = Injector.getDrawable(this, pm, resolvePackageName, icon, null);
+            dr = pm.getDrawable(resolvePackageName, icon, null);
             if (dr != null) {
                 return dr;
             }
@@ -201,7 +197,7 @@ public class ResolveInfo implements Parcelable {
         ComponentInfo ci = getComponentInfo();
         ApplicationInfo ai = ci.applicationInfo;
         if (icon != 0) {
-            dr = Injector.getDrawable(this, pm, ci.packageName, icon, ai);
+            dr = pm.getDrawable(ci.packageName, icon, ai);
             if (dr != null) {
                 return dr;
             }
@@ -388,20 +384,5 @@ public class ResolveInfo implements Parcelable {
 
         private final Collator   mCollator = Collator.getInstance();
         private PackageManager   mPM;
-    }
-
-    @CosHook(CosHook.CosHookType.NEW_CLASS)
-    static class Injector {
-        static Drawable getDrawable(ResolveInfo ri, PackageManager pm, String packageName, int icon, ApplicationInfo ai) {
-            ComponentInfo ci;
-            if(ri.activityInfo != null)
-                ci = ri.activityInfo;
-            else
-                ci = ri.serviceInfo;
-            return ThemeHelper.getDrawable(pm, packageName, icon, ai, ci, ThemeHelper.isCustomizedIcon(ri.filter));
-        }
-
-        Injector() {
-        }
     }
 }

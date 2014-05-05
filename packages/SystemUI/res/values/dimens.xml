@@ -233,23 +233,6 @@
     <!-- Quick Settings tile geometry: text size for 5 tile per row-->
     <dimen name="qs_5_column_text_size">9sp</dimen>
 
-    <!-- theme -->
-    <!-- Height of the brightness slider in the toggles tab -->
-<!--    <dimen name="toggles_slider_panel_height">48dp</dimen>-->
-
-    <!-- Toggles row height for page layout -->
-<!--    <dimen name="status_bar_toggles_row_height">100dp</dimen>-->
-
-    <!-- Height of trigger for revealing a hidden status bar or navbar -->
-<!--    <dimen name="trigger_view_height">2dip</dimen>-->
-
-    <!-- The padding of the items of the battery cluster -->
-<!--    <dimen name="status_bar_battery_cluster_padding">2dip</dimen>-->
-    <!-- The margin adjusment of the text items of the battery cluster -->
-<!--    <dimen name="status_bar_battery_cluster_text_margin">-1dip</dimen>-->
-
-<!--    <dimen name="wifi_combo_margin_right">-6dp</dimen>-->
-
     <!-- Network stats text size -->
     <dimen name="network_stats_text_size">10dp</dimen>
 
@@ -274,5 +257,4 @@
     <dimen name="pie_sysinfo_radius">165dp</dimen>
     <dimen name="pie_sysinfo_second_layer_radius">255dp</dimen>
     <dimen name="pie_sysinfo_height">85sp</dimen>
-
 </resources>

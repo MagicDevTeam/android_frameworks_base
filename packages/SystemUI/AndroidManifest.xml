@@ -86,9 +86,6 @@
     <!-- Reboot -->
     <uses-permission android:name="android.permission.REBOOT" />
 
-    <!-- theme -->
-    <uses-permission android:name="android.permission.ACCESS_THEME_SERVICE" />
-
     <application
         android:persistent="true"
         android:allowClearUserData="false"

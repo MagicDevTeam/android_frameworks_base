@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.annotation.CosHook;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -3197,26 +3196,6 @@ public abstract class PackageManager {
      */
     public abstract void movePackage(
             String packageName, IPackageMoveObserver observer, int flags);
-			
-    /**
-     * Returns whether theme compatibility is on for given package.
-     *
-     * @param packageName Name of the package
-     * @hide
-     */
-    @CosHook(CosHook.CosHookType.NEW_METHOD)
-
-    public abstract boolean isThemeCompatibilityModeEnabled(String packageName);
-
-    /**
-     * Returns whether theme compatibility is on for given package.
-     *
-     * @param packageName Name of the package
-     * @param compatOn true if compatibility mode is to be used, false otherwise
-     * @hide
-     */
-    @CosHook(CosHook.CosHookType.NEW_METHOD)
-    public abstract void setThemeCompatibilityMode(String packageName, boolean compatOn);
 
     /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular

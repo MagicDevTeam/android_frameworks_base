@@ -157,7 +157,6 @@ class ServerThread {
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
-        ThemeManagerService themeService = null;
 
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
@@ -420,17 +419,9 @@ class ServerThread {
                 }
             }
 
-            try {
-                Slog.i(TAG, "Theme Service");
-                themeService = new ThemeManagerService(context);
-                ServiceManager.addService("ThemeService", themeService);
-            } catch (Throwable e) {
-                reportWtf("Failure starting ThemeManagerService Service", e);
-            }
-
             if (!disableNonCoreServices) {
                 try {
-                    Slog.i(TAG, "LockSettingsService");
+                    Slog.i(TAG,  "LockSettingsService");
                     lockSettings = new LockSettingsService(context);
                     ServiceManager.addService("lock_settings", lockSettings);
                 } catch (Throwable e) {

@@ -35,7 +35,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
@@ -66,8 +65,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.CosHook;
-import android.annotation.CosHook.CosHookType;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -95,7 +92,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
-import android.app.ThemeHelper;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -5283,12 +5279,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     @Override
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             ActivityRecord r = getCallingRecordLocked(token);
-            return r != null && r.app != null ? r.info.packageName : Injector.getCallingUidPackage(this, token);
+            return r != null ? r.info.packageName : null;
         }
     }
 
@@ -14140,9 +14135,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, AppOpsManager.OP_NONE, false, false, MY_PID,
                         Process.SYSTEM_UID, UserHandle.USER_ALL);
-
-                ThemeHelper.handleExtraConfigurationChanges(changes, newConfig, mContext, mHandler);
-
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -16641,37 +16633,5 @@ public final class ActivityManagerService extends ActivityManagerNative
         ActivityInfo info = new ActivityInfo(aInfo);
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
-    }
-
-    @CosHook(CosHook.CosHookType.NEW_CLASS)
-    static class Injector {
-
-        static String getCallingUidPackage(ActivityManagerService service, IBinder token) {
-            String s;
-            ActivityRecord r;
-            s = null;
-            r = service.mStackSupervisor.isInAnyStackLocked(token);
-            if(r == null)
-                return null;
-            
-            int callingUid = r.launchedFromUid;
-            if(callingUid > 0)
-                try {
-                    String packages[] = AppGlobals.getPackageManager().getPackagesForUid(callingUid);
-                    if(packages.length > 0)
-                        s = packages[0];
-                }
-                catch(RemoteException remoteexception) { }
-            return s;
-        }
-
-        static boolean isForegroudApp(ActivityManagerService service, ProcessRecord app, ProcessRecord TOP_APP) {
-            return !(app != TOP_APP && (app != service.mHomeProcess || 
-                android.provider.Settings.System.getInt(service.mContext.getContentResolver(), 
-                "keep_launcher_in_memory", 1) == 0));
-        }
-
-        Injector() {
-        }
     }
 }

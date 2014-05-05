@@ -42,8 +42,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.content.SharedPreferences;
-import android.content.res.IThemeManagerService;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
@@ -61,7 +59,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.AlarmClock;
@@ -92,7 +89,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -102,6 +98,7 @@ import com.android.internal.util.mm.ButtonConfig;
 import com.android.internal.util.mm.ButtonsConstants;
 import com.android.internal.util.mm.ButtonsHelper;
 import com.android.internal.util.mm.DeviceUtils;
+
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryCircleMeterView;
 import com.android.systemui.DemoMode;
@@ -127,8 +124,6 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import cos.content.res.ExtraConfiguration;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     static final String TAG = "PhoneStatusBar";
@@ -944,7 +939,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(ACTION_DEMO);
-        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // receive broadcasts for app actions
@@ -2562,7 +2556,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (n.getNotification().tickerText != null && mStatusBarContainer.getWindowToken() != null) {
+        if (n.getNotification().tickerText != null && mStatusBarWindow.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
@@ -3036,14 +3030,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     prepareNavigationBarView();
                 }
             }
-            else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                // ugly hack to get systemui to reload resources since some drawables
-                // do not load on boot (like status_bar_background or notification_panel_bg)
-                IThemeManagerService ts = IThemeManagerService.Stub.asInterface(ServiceManager.getService("ThemeService"));
-                try {
-                    ts.updateSystemUI();
-                } catch (Exception e) {}
-            }
         }
     };
 
@@ -3203,10 +3189,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mRecreating = false;
     }
 
-    private void recreateStatusBar() {
-        recreateStatusBar(true);
-    }
-
     /**
      * Reload some of our resources when the configuration changes.
      *
@@ -3217,12 +3199,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     void updateResources() {
         final Context context = mContext;
         final Resources res = context.getResources();
-
-        // detect theme change
-        ExtraConfiguration extraConfig = res.getConfiguration().extraConfig;
-        if ((extraConfig.mThemeChangedFlags & (ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG)) != 0) {
-            recreateStatusBar();
-        }
 
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));

@@ -53,7 +53,6 @@
 #include "BootAnimation.h"
 
 #define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
-#define THEME_BOOTANIMATION_FILE "/data/system/theme/boots/bootanimation.zip"
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
 #define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
 #define EXIT_PROP_NAME "service.bootanim.exit"
@@ -286,8 +285,8 @@ status_t BootAnimation::readyToRun() {
             (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
             (mZip.open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE) == NO_ERROR)) ||
 
-            ((access(THEME_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(THEME_BOOTANIMATION_FILE) == NO_ERROR)) ||
+            ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) &&
+            (mZip.open(USER_BOOTANIMATION_FILE) == NO_ERROR)) ||
 
             ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
             (mZip.open(SYSTEM_BOOTANIMATION_FILE) == NO_ERROR))) {
@@ -301,8 +300,6 @@ status_t BootAnimation::readyToRun() {
     FILE* fd;
     if (encryptedAnimation && access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)
         fd = fopen(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, "r");
-    else if (access(THEME_BOOTANIMATION_FILE, R_OK) == 0)
-        fd = fopen(THEME_BOOTANIMATION_FILE, "r");
     else if (access(USER_BOOTANIMATION_FILE, R_OK) == 0)
         fd = fopen(USER_BOOTANIMATION_FILE, "r");
     else if (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0)
@@ -444,29 +441,16 @@ bool BootAnimation::movie()
 
     Animation animation;
 
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
-
     // Parse the description file
     for (;;) {
         const char* endl = strstr(s, "\n");
         if (!endl) break;
         String8 line(s, endl - s);
         const char* l = line.string();
-        int fps, width, height, count, pause, red, green, blue;
+        int fps, width, height, count, pause;
         char path[256];
         char pathType;
-        if (sscanf(l, "%d %d %d %d %d %d", &width, &height, &fps, &red, &green, &blue) == 6) {
-            //ALOGD("> w=%d, h=%d, fps=%d, rgb=(%d, %d, %d)", width, height, fps, red, green, blue);
-            animation.width = width;
-            animation.height = height;
-            animation.fps = fps;
-            r = (float) red / 255.0f;
-            g = (float) green / 255.0f;
-            b = (float) blue / 255.0f;
-        }
-        else if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
+        if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
             //LOGD("> w=%d, h=%d, fps=%d", width, height, fps);
             animation.width = width;
             animation.height = height;
@@ -522,7 +506,7 @@ bool BootAnimation::movie()
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
     glDisable(GL_BLEND);
-    glClearColor(r,g,b,1);
+    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
 
     eglSwapBuffers(mDisplay, mSurface);
