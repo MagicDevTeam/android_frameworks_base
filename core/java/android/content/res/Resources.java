@@ -90,9 +90,9 @@ public class Resources {
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
     private static final LongSparseArray<Drawable.ConstantState>[] sPreloadedDrawables;
-    protected static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
+    private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<Drawable.ConstantState>();
-    protected static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
+    private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
             = new LongSparseArray<ColorStateList>();
 
     private static boolean sPreloaded;
@@ -1660,6 +1660,15 @@ public class Resources {
         }
     }
 
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    static void clearPreloadedCache()
+    {
+        sPreloadedDrawables[0].clear();
+        sPreloadedDrawables[1].clear();
+        sPreloadedColorStateLists.clear();
+        sPreloadedColorDrawables.clear();
+    }
+
     /**
      * Update the system resources configuration if they have previously
      * been initialized.
@@ -2058,68 +2067,78 @@ public class Resources {
         if (dr != null) {
             return dr;
         }
-        Drawable.ConstantState cs = null;
+        Drawable.ConstantState cs;
         if (isColorDrawable) {
-            dr = new ColorDrawable(value.data);
+            cs = sPreloadedColorDrawables.get(key);
+        } else {
+            cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
         }
-
-        if (dr == null) {
-            if (value.string == null) {
-                throw new NotFoundException(
-                        "Resource is not a Drawable (color or path): " + value);
+        if (cs != null) {
+            dr = cs.newDrawable(this);
+        } else {
+            if (isColorDrawable) {
+                dr = new ColorDrawable(value.data);
             }
 
-            String file = value.string.toString();
-
-            if (TRACE_FOR_MISS_PRELOAD) {
-                // Log only framework resources
-                if ((id >>> 24) == 0x1) {
-                    final String name = getResourceName(id);
-                    if (name != null) android.util.Log.d(TAG, "Loading framework drawable #"
-                            + Integer.toHexString(id) + ": " + name
-                            + " at " + file);
+            if (dr == null) {
+                if (value.string == null) {
+                    throw new NotFoundException(
+                            "Resource is not a Drawable (color or path): " + value);
                 }
-            }
 
-            if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
-                    + value.assetCookie + ": " + file);
+                String file = value.string.toString();
 
-            if (file.endsWith(".xml")) {
-                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
-                try {
-                    XmlResourceParser rp = loadXmlResourceParser(
-                            file, id, value.assetCookie, "drawable");
-                    dr = Drawable.createFromXml(this, rp);
-                    rp.close();
-                } catch (Exception e) {
-                    Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-                    NotFoundException rnf = new NotFoundException(
+                if (TRACE_FOR_MISS_PRELOAD) {
+                    // Log only framework resources
+                    if ((id >>> 24) == 0x1) {
+                        final String name = getResourceName(id);
+                        if (name != null) android.util.Log.d(TAG, "Loading framework drawable #"
+                                + Integer.toHexString(id) + ": " + name
+                                + " at " + file);
+                    }
+                }
+
+                if (DEBUG_LOAD) Log.v(TAG, "Loading drawable for cookie "
+                        + value.assetCookie + ": " + file);
+
+                if (file.endsWith(".xml")) {
+                    Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+                    try {
+                        XmlResourceParser rp = loadXmlResourceParser(
+                                file, id, value.assetCookie, "drawable");
+                        dr = Drawable.createFromXml(this, rp);
+                        rp.close();
+                    } catch (Exception e) {
+                        Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+                        NotFoundException rnf = new NotFoundException(
                             "File " + file + " from drawable resource ID #0x"
-                                    + Integer.toHexString(id));
-                    rnf.initCause(e);
-                    throw rnf;
-                }
-                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-
-            } else {
-                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
-                try {
-                    InputStream is = mAssets.openNonAsset(
-                            value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                    //                System.out.println("Opened file " + file + ": " + is);
-                    dr = Injector.createFromResourceStream(this, value, is,
-                            file, id, null);
-                    is.close();
-                    //                System.out.println("Created stream: " + dr);
-                } catch (Exception e) {
+                            + Integer.toHexString(id));
+                        rnf.initCause(e);
+                        throw rnf;
+                    }
                     Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-                    NotFoundException rnf = new NotFoundException(
+
+                } else {
+                    Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+                    try {
+                        InputStream is = mAssets.openNonAsset(
+                                value.assetCookie, file, AssetManager.ACCESS_STREAMING);
+        //                System.out.println("Opened file " + file + ": " + is);
+                        Injector.setDrawableId(id);
+                        dr = Injector.createFromResourceStream(this, value, is,
+                                file, null);
+                        is.close();
+        //                System.out.println("Created stream: " + dr);
+                    } catch (Exception e) {
+                        Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+                        NotFoundException rnf = new NotFoundException(
                             "File " + file + " from drawable resource ID #0x"
-                                    + Integer.toHexString(id));
-                    rnf.initCause(e);
-                    throw rnf;
+                            + Integer.toHexString(id));
+                        rnf.initCause(e);
+                        throw rnf;
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                 }
-                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             }
         }
 
@@ -2422,15 +2441,19 @@ public class Resources {
     static class Injector {
         private static final boolean DBG = false;
         private static final String TAG = "Resources.Injector";
+        private static int mId;
 
-
-        static Drawable createFromResourceStream(Resources res, TypedValue value,
-                InputStream is, String srcName, int id, BitmapFactory.Options opts) {
-            if (DBG) Log.d(TAG, String.format("createFromResourceStream: %s, %d", value.string, id));
-            Drawable dr = res.loadOverlayDrawable(value, id);
+        static Drawable createFromResourceStream(Resources res, TypedValue value, 
+                InputStream is, String srcName, BitmapFactory.Options opts) {
+            if (DBG) Log.d(TAG, String.format("createFromResourceStream: %s, %d", value.string, mId));
+            Drawable dr = res.loadOverlayDrawable(value, mId);
             if (dr == null)
                 dr = Drawable.createFromResourceStream(res, value, is, srcName, opts);
             return dr;
+        }
+
+        static void setDrawableId(int id) {
+            mId = id;
         }
     }
 }
