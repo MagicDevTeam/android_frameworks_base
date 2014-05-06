@@ -290,7 +290,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     // last theme that was applied in order to detect theme change (as opposed
     // to some other configuration change).
     CustomTheme mCurrentTheme;
-    private boolean mRecreating = false;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -719,11 +718,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mCenterClockLayout = (LinearLayout)mStatusBarView.findViewById(R.id.center_clock_layout);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
-        /* Destroy the old widget before recreating the expanded dialog
-           to make sure there are no context issues */
-        if (mRecreating)
-            mPowerWidget.destroyWidget();
-
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
         mPile.setLayoutTransitionsEnabled(false);
         mPile.setLongPressListener(getNotificationLongClicker());
@@ -1018,10 +1012,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
         | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         return lp;
-    }
-
-    void onBarViewDetached() {
-     //   WindowManagerImpl.getDefault().removeView(mStatusBarWindow);
     }
 
     @Override
@@ -3215,6 +3205,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         restorePieTriggerMask();
+        
+        mRecreating = false;
+    }
+
+    private void recreateStatusBar() {
+        recreateStatusBar(true);
     }
 
     /**
@@ -3239,12 +3235,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mClearButton instanceof TextView) {
                 ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
             }
-            loadDimens();
+            //loadDimens();
         }
 
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
 
+        loadDimens();
     }
 
     protected void loadDimens() {
