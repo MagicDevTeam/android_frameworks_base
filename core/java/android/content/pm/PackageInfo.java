@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +16,8 @@
  */
 
 package android.content.pm;
+
+import java.util.ArrayList;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -218,6 +221,18 @@ public class PackageInfo implements Parcelable {
      */
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
 
+    // Is Theme Apk
+    /**
+     * {@hide}
+     */
+    public boolean isThemeApk = false;
+
+    // ThemeInfo
+    /**
+     * {@hide}
+     */
+    public ThemeInfo [] themeInfos;
+
     /** @hide */
     public boolean requiredForAllUsers;
 
@@ -270,6 +285,11 @@ public class PackageInfo implements Parcelable {
         dest.writeInt(requiredForAllUsers ? 1 : 0);
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
+
+        /* Theme-specific. */
+        dest.writeInt((isThemeApk)? 1 : 0);
+        dest.writeStringList(mOverlayTargets);
+        dest.writeTypedArray(themeInfos, parcelableFlags);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -311,5 +331,10 @@ public class PackageInfo implements Parcelable {
         requiredForAllUsers = source.readInt() != 0;
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
+
+        /* Theme-specific. */
+        isThemeApk = (source.readInt() != 0);
+        mOverlayTargets = source.createStringArrayList();
+        themeInfos = source.createTypedArray(ThemeInfo.CREATOR);
     }
 }
