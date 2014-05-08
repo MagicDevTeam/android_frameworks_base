@@ -19,13 +19,20 @@ package android.app;
 import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.CustomTheme;
 import android.content.res.Resources;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -49,6 +56,7 @@ public class ResourcesManager {
             = new ArrayMap<DisplayAdjustments, DisplayMetrics>();
 
     CompatibilityInfo mResCompatibilityInfo;
+    static IPackageManager sPackageManager;
 
     Configuration mResConfiguration;
     final Configuration mTmpConfig = new Configuration();
@@ -150,7 +158,8 @@ public class ResourcesManager {
     public Resources getTopLevelResources(String resDir, int displayId,
             Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
         final float scale = compatInfo.applicationScale;
-        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale,
+        final boolean isThemeable = compatInfo.isThemeable;
+        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale, isThemeable,
                 token);
         Resources r;
         synchronized (this) {
@@ -176,6 +185,7 @@ public class ResourcesManager {
         //}
 
         AssetManager assets = new AssetManager();
+        assets.setThemeSupport(compatInfo.isThemeable);
         if (assets.addAssetPath(resDir) == 0) {
             return null;
         }
@@ -196,6 +206,18 @@ public class ResourcesManager {
         } else {
             config = getConfiguration();
         }
+
+        /* Attach theme information to the resulting AssetManager when appropriate. */
+        if (compatInfo.isThemeable && config != null) {
+            if (config.customTheme == null) {
+                config.customTheme = CustomTheme.getBootTheme();
+            }
+
+            if (config.customTheme != null) {
+                attachThemeAssets(assets, config.customTheme);
+            }
+        }
+
         r = new Resources(assets, dm, config, compatInfo, token);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
@@ -219,7 +241,7 @@ public class ResourcesManager {
         }
     }
 
-    public final boolean applyConfigurationToResourcesLocked(Configuration config,
+    public final int applyConfigurationToResourcesLocked(Configuration config,
             CompatibilityInfo compat) {
         if (mResConfiguration == null) {
             mResConfiguration = new Configuration();
@@ -227,7 +249,7 @@ public class ResourcesManager {
         if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
                     + mResConfiguration.seq + ", newSeq=" + config.seq);
-            return false;
+            return 0;
         }
         int changes = mResConfiguration.updateFrom(config);
         flushDisplayMetricsLocked();
@@ -263,6 +285,16 @@ public class ResourcesManager {
                 boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
                 DisplayMetrics dm = defaultDisplayMetrics;
                 final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+                boolean themeChanged = (changes & ActivityInfo.CONFIG_THEME_RESOURCE) != 0;
+                if (themeChanged) {
+                    AssetManager am = r.getAssets();
+                    if (am.hasThemeSupport()) {
+                        detachThemeAssets(am);
+                        if (config.customTheme != null) {
+                            attachThemeAssets(am, config.customTheme);
+                        }
+                    }
+                }
                 if (!isDefaultDisplay || hasOverrideConfiguration) {
                     if (tmpConfig == null) {
                         tmpConfig = new Configuration();
@@ -278,6 +310,9 @@ public class ResourcesManager {
                     r.updateConfiguration(tmpConfig, dm, compat);
                 } else {
                     r.updateConfiguration(config, dm, compat);
+                }
+                if (themeChanged) {
+                    r.updateStringCache();
                 }
                 //Slog.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +77,15 @@ public final class AssetManager {
     
     private int mNumRefs = 1;
     private boolean mOpen = true;
-    private HashMap<Integer, RuntimeException> mRefStacks; 
- 
+    private HashMap<Integer, RuntimeException> mRefStacks;
+
+    private String mAssetDir;
+    private String mAppName;
+
+    private boolean mThemeSupport;
+    private String mThemePackageName;
+    private ArrayList<Integer> mThemeCookies = new ArrayList<Integer>(2);
+
     /**
      * Create a new AssetManager containing only the basic system assets.
      * Applications will not generally use this method, instead retrieving the
@@ -250,6 +258,12 @@ public final class AssetManager {
                     makeStringBlocks(true);
                 }
             }
+        }
+    }
+
+    /*package*/ final void recreateStringBlocks() {
+        synchronized (this) {
+            makeStringBlocks(true);
         }
     }
 
@@ -628,6 +642,86 @@ public final class AssetManager {
         }
 
         return cookies;
+    }
+
+    /**
+     * Delete a set of theme assets from the asset manager. Not for use by
+     * applications. Returns true if succeeded or false on failure.
+     *
+     * @hide
+     */
+    public native final boolean detachThemePath(String packageName, int cookie);
+
+    /**
+     * Attach a set of theme assets to the asset manager. If necessary, this
+     * method will forcefully update the internal ResTable data structure.
+     *
+     * @return Cookie of the added asset or 0 on failure.
+     * @hide
+     */
+    public native final int attachThemePath(String path);
+
+    /**
+     * Sets a flag indicating that this AssetManager should have themes
+     * attached, according to the initial request to create it by the
+     * ApplicationContext.
+     *
+     * {@hide}
+     */
+    public final void setThemeSupport(boolean themeSupport) {
+        mThemeSupport = themeSupport;
+    }
+
+    /**
+     * Should this AssetManager have themes attached, according to the initial
+     * request to create it by the ApplicationContext?
+     *
+     * {@hide}
+     */
+    public final boolean hasThemeSupport() {
+        return mThemeSupport;
+    }
+
+    /**
+     * Apply a heuristic to match-up all attributes from the source style with
+     * attributes in the destination style. For each match, an entry in the
+     * package redirection map will be inserted.
+     *
+     * {@hide}
+     */
+    public native final boolean generateStyleRedirections(int resMapNative, int sourceStyle,
+            int destStyle);
+
+    /**
+     * Get package name of current theme (may return null).
+     * {@hide}
+     */
+    public String getThemePackageName() {
+        return mThemePackageName;
+    }
+
+    /**
+     * Sets package name and highest level style id for current theme (null, 0 is allowed).
+     * {@hide}
+     */
+    public void setThemePackageName(String packageName) {
+        mThemePackageName = packageName;
+    }
+
+    /**
+     * Get asset cookie for current theme (may return 0).
+     * {@hide}
+     */
+    public ArrayList<Integer> getThemeCookies() {
+        return mThemeCookies;
+    }
+
+    /**
+     * Sets asset cookie for current theme (0 if not a themed asset manager).
+     * {@hide}
+     */
+    public void addThemeCookie(int cookie) {
+        mThemeCookies.add(cookie);
     }
 
     /**

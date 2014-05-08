@@ -1580,6 +1580,8 @@ public:
         return getIdmapInfo(idmap, size, pTargetCrc, pOverlayCrc);
     }
 
+    void removeAssetsByCookie(const String8 &packageName, void* cookie);
+
     void print(bool inclValues) const;
     static String8 normalizeForOutput(const char* input);
 
