@@ -42,7 +42,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.content.res.CustomTheme;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
@@ -90,7 +89,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -286,10 +284,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
-
-    // last theme that was applied in order to detect theme change (as opposed
-    // to some other configuration change).
-    CustomTheme mCurrentTheme;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -594,11 +588,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
-
-        CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
-        if (currentTheme != null) {
-            mCurrentTheme = (CustomTheme)currentTheme.clone();
-        }
 
         super.start(); // calls createAndAddWindows()
 
@@ -1147,13 +1136,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
         if (mNavigationBarView == null) return;
 
-        CustomTheme newTheme = mContext.getResources().getConfiguration().customTheme;
-        if (newTheme != null &&
-                (mCurrentTheme == null || !mCurrentTheme.equals(newTheme))) {
-            // Nevermind, this will be re-created
-            return;
-        }
-
         prepareNavigationBarView();
 
         mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
@@ -1164,12 +1146,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void repositionNavigationBar() {
         if (mNavigationBarView == null || !mNavigationBarView.isAttachedToWindow()) return;
 
-        CustomTheme newTheme = mContext.getResources().getConfiguration().customTheme;
-        if (newTheme != null &&
-                (mCurrentTheme == null || !mCurrentTheme.equals(newTheme))) {
-            // Nevermind, this will be re-created
-            return;
-        }
         prepareNavigationBarView();
 
         mWindowManager.updateViewLayout(mNavigationBarView, getNavigationBarLayoutParams());
@@ -1804,7 +1780,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams)
+                mStatusBarContainer.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -2161,7 +2138,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams)
+                mStatusBarContainer.getLayoutParams();
         lp.height = getStatusBarHeight();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -2578,7 +2556,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (n.getNotification().tickerText != null && mStatusBarContainer.getWindowToken() != null) {
+        if (n.getNotification().tickerText != null && mStatusBarWindow.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
@@ -2763,6 +2741,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private void addStatusBarWindow() {
         // Put up the view
         final int height = getStatusBarHeight();
+
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
@@ -3176,6 +3155,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationData.clear();
 
         makeStatusBarView();
+
         if (mNavigationBarView != null && recreateNavigationBar) {
             // recreate and reposition navigationbar
             mNavigationBarView.recreateNavigationBar();
@@ -3209,10 +3189,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mRecreating = false;
     }
 
-    private void recreateStatusBar() {
-        recreateStatusBar(true);
-    }
-
     /**
      * Reload some of our resources when the configuration changes.
      *
@@ -3224,18 +3200,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         final Context context = mContext;
         final Resources res = context.getResources();
 
-        // detect theme change.
-        CustomTheme newTheme = res.getConfiguration().customTheme;
-        if (newTheme != null &&
-                (mCurrentTheme == null || !mCurrentTheme.equals(newTheme))) {
-            mCurrentTheme = (CustomTheme)newTheme.clone();
-            recreateStatusBar();
-        } else {
-
-            if (mClearButton instanceof TextView) {
-                ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
-            }
-            //loadDimens();
+        if (mClearButton instanceof TextView) {
+            ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
 
         // Update the QuickSettings container
@@ -3489,4 +3455,5 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
         }
     }
+
 }

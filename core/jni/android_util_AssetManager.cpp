@@ -1,7 +1,6 @@
 /* //device/libs/android_runtime/android_util_AssetManager.cpp
 **
 ** Copyright 2006, The Android Open Source Project
-** This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -230,7 +229,8 @@ static jint android_content_AssetManager_openNonAssetNative(JNIEnv* env, jobject
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), (Asset::AccessMode)mode)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(),
+                (Asset::AccessMode)mode)
         : am->openNonAsset(fileName8.c_str(), (Asset::AccessMode)mode);
 
     if (a == NULL) {
@@ -261,7 +261,7 @@ static jobject android_content_AssetManager_openNonAssetFdNative(JNIEnv* env, jo
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), Asset::ACCESS_RANDOM)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(), Asset::ACCESS_RANDOM)
         : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_RANDOM);
 
     if (a == NULL) {
@@ -436,10 +436,10 @@ static jint android_content_AssetManager_addAssetPath(JNIEnv* env, jobject clazz
         return 0;
     }
 
-    void* cookie;
+    int32_t cookie;
     bool res = am->addAssetPath(String8(path8.c_str()), &cookie);
 
-    return (res) ? (jint)cookie : 0;
+    return (res) ? static_cast<jint>(cookie) : 0;
 }
 
 static jboolean android_content_AssetManager_isUpToDate(JNIEnv* env, jobject clazz)
@@ -801,7 +801,7 @@ static jstring android_content_AssetManager_getCookieName(JNIEnv* env, jobject c
     if (am == NULL) {
         return NULL;
     }
-    String8 name(am->getAssetPath((void*)cookie));
+    String8 name(am->getAssetPath(static_cast<int32_t>(cookie)));
     if (name.length() == 0) {
         jniThrowException(env, "java/lang/IndexOutOfBoundsException", "Empty cookie name");
         return NULL;
@@ -1387,7 +1387,7 @@ static jint android_content_AssetManager_openXmlAssetNative(JNIEnv* env, jobject
     }
 
     Asset* a = cookie
-        ? am->openNonAsset((void*)cookie, fileName8.c_str(), Asset::ACCESS_BUFFER)
+        ? am->openNonAsset(static_cast<int32_t>(cookie), fileName8.c_str(), Asset::ACCESS_BUFFER)
         : am->openNonAsset(fileName8.c_str(), Asset::ACCESS_BUFFER);
 
     if (a == NULL) {
@@ -1615,37 +1615,6 @@ static jint android_content_AssetManager_getGlobalAssetManagerCount(JNIEnv* env,
     return AssetManager::getGlobalCount();
 }
 
-static jint android_content_AssetManager_getBasePackageCount(JNIEnv* env, jobject clazz)
-{
-    AssetManager* am = assetManagerForJavaObject(env, clazz);
-    if (am == NULL) {
-        return JNI_FALSE;
-    }
-
-    return am->getResources().getBasePackageCount();
-}
-
-static jstring android_content_AssetManager_getBasePackageName(JNIEnv* env, jobject clazz, jint index)
-{
-    AssetManager* am = assetManagerForJavaObject(env, clazz);
-    if (am == NULL) {
-        return JNI_FALSE;
-    }
-
-    String16 packageName(am->getResources().getBasePackageName(index));
-    return env->NewString((const jchar*)packageName.string(), packageName.size());
-}
-
-static jint android_content_AssetManager_getBasePackageId(JNIEnv* env, jobject clazz, jint index)
-{
-    AssetManager* am = assetManagerForJavaObject(env, clazz);
-    if (am == NULL) {
-        return JNI_FALSE;
-    }
-
-    return am->getResources().getBasePackageId(index);
-}
-
 // ----------------------------------------------------------------------------
 
 /*
@@ -1679,12 +1648,6 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addAssetPath },
-    { "getBasePackageCount", "()I",
-        (void*) android_content_AssetManager_getBasePackageCount },
-    { "getBasePackageName", "(I)Ljava/lang/String;",
-        (void*) android_content_AssetManager_getBasePackageName },
-    { "getBasePackageId", "(I)I",
-        (void*) android_content_AssetManager_getBasePackageId },
     { "isUpToDate",     "()Z",
         (void*) android_content_AssetManager_isUpToDate },
 

@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +24,6 @@
 #include <utils/Log.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
-#include <utils/misc.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +42,6 @@
 #define TABLE_SUPER_NOISY(x) //x
 #define LOAD_TABLE_NOISY(x) //x
 #define TABLE_THEME(x) //x
-#define REDIRECT_NOISY(x) //x
 
 namespace android {
 
@@ -5477,57 +5474,6 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
     return true;
 }
 
-void ResTable::removeAssetsByCookie(const String8 &packageName, void* cookie)
-{
-    mError = NO_ERROR;
-
-    size_t N = mHeaders.size();
-    for (size_t i = 0; i < N; i++) {
-        Header* header = mHeaders[i];
-        if ((size_t)header->cookie == (size_t)cookie) {
-            if (header->ownedData != NULL) {
-                free(header->ownedData);
-            }
-            mHeaders.removeAt(i);
-            break;
-        }
-    }
-    size_t pgCount = mPackageGroups.size();
-    for (size_t pgIndex = 0; pgIndex < pgCount; pgIndex++) {
-        PackageGroup* pg = mPackageGroups[pgIndex];
-
-        size_t pkgCount = pg->packages.size();
-        size_t index = pkgCount;
-        for (size_t pkgIndex = 0; pkgIndex < pkgCount; pkgIndex++) {
-            const Package* pkg = pg->packages[pkgIndex];
-            if (String8(String16(pkg->package->name)).compare(packageName) == 0) {
-                index = pkgIndex;
-                ALOGV("Delete Package %d id=%d name=%s\n",
-                     (int)pkgIndex, pkg->package->id,
-                     String8(String16(pkg->package->name)).string());
-                break;
-            }
-        }
-        if (index < pkgCount) {
-            const Package* pkg = pg->packages[index];
-            uint32_t id = dtohl(pkg->package->id);
-            if (id != 0 && id < 256) {
-                mPackageMap[id] = 0;
-            }
-            if (pkgCount == 1) {
-                ALOGV("Delete Package Group %d id=%d packageCount=%d name=%s\n",
-                      (int)pgIndex, pg->id, (int)pg->packages.size(),
-                      String8(pg->name).string());
-                mPackageGroups.removeAt(pgIndex);
-                delete pg;
-            } else {
-                pg->packages.removeAt(index);
-                delete pkg;
-            }
-            return;
-        }
-    }
-}
 
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
