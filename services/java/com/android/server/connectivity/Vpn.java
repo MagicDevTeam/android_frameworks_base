@@ -45,7 +45,6 @@ import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.NetworkInfo;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.os.Binder;
@@ -78,7 +77,6 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
@@ -445,18 +443,6 @@ public class Vpn extends BaseNetworkStateTracker {
         // TODO: ensure that contract class eventually marks as connected
         updateState(DetailedState.AUTHENTICATING, "establish");
         return tun;
-    }
-
-    /**
-     * Check if a given address is covered by the VPN's routing rules.
-     */
-    public boolean isAddressCovered(InetAddress address) {
-        synchronized (Vpn.this) {
-            if (!isRunningLocked()) {
-                return false;
-            }
-            return RouteInfo.selectBestRoute(mConfig.routes, address) != null;
-        }
     }
 
     private boolean isRunningLocked() {
