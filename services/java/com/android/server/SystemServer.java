@@ -839,13 +839,6 @@ class ServerThread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting EdgeGesture service", e);
             }
-
-            try {
-                Slog.i(TAG, "AssetRedirectionManager Service");
-                ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
-            }
         }
 
         // Before things start rolling, be sure we have decided whether
