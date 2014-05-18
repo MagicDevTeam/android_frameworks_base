@@ -41,7 +41,6 @@ public final class NavigationBarTransitions extends BarTransitions {
     private boolean mLightsOut;
     private boolean mVertical;
     private int mRequestedMode;
-    private boolean mStickyTransparent;
 
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
@@ -67,8 +66,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (mVertical && mode == MODE_TRANSLUCENT) {
             // translucent mode not allowed when vertical
             mode = MODE_OPAQUE;
-        } else if (mStickyTransparent) {
-            mode = MODE_TRANSPARENT;
         }
         super.transitionTo(mode, animate);
     }
@@ -142,17 +139,6 @@ public final class NavigationBarTransitions extends BarTransitions {
 
         if (backAlpha > 0) {
             setKeyButtonViewQuiescentAlpha(back, backAlpha, animate);
-        }
-    }
-
-    public void applyTransparent(boolean sticky) {
-        if (sticky != mStickyTransparent) {
-            mStickyTransparent = sticky;
-            if (!mStickyTransparent) {
-                transitionTo(mRequestedMode, false);
-            } else {
-                transitionTo(MODE_TRANSPARENT, false);
-            }
         }
     }
 
