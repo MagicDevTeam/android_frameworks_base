@@ -15,13 +15,9 @@
 
 package com.android.server;
 
-<<<<<<< HEAD
-import com.android.internal.app.ThemeUtils;
-=======
 import android.content.pm.ThemeUtils;
 import android.provider.Settings.SettingNotFoundException;
 
->>>>>>> 34d6168... New Theme Engine [1/6]
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;

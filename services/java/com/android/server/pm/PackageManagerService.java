@@ -1166,11 +1166,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PRIVILEGED);
 
-<<<<<<< HEAD
-=======
-
-        mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
->>>>>>> 34d6168... New Theme Engine [1/6]
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
             if ("*".equals(separateProcesses)) {

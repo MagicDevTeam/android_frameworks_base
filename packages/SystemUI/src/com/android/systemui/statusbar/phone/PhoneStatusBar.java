@@ -3240,15 +3240,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
-<<<<<<< HEAD
 
         loadDimens();
-=======
-        if (mNavigationBarView != null)  {
+        /*if (mNavigationBarView != null)  {
             mNavigationBarView.updateResources();
             updateSearchPanel();
-        }
->>>>>>> 34d6168... New Theme Engine [1/6]
+        }*/
     }
 
     protected void loadDimens() {

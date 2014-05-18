@@ -593,26 +593,6 @@ class ContextImpl extends Context {
             public Object createService(ContextImpl ctx) {
                 return new ConsumerIrManager(ctx);
             }});
-<<<<<<< HEAD
-=======
-
-        registerService(PROFILE_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    final Context outerContext = ctx.getOuterContext();
-                    return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
-                }});
-
-        registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
-                }});
-
-        registerService(BATTERY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(BATTERY_SERVICE);
-                    IBatteryService service = IBatteryService.Stub.asInterface(b);
-                    return new BatteryManager(service, ctx);
-                }});
 
         registerService(THEME_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
@@ -621,7 +601,6 @@ class ContextImpl extends Context {
                 return new ThemeManager(ctx.getOuterContext(),
                         service);
             }});
->>>>>>> 34d6168... New Theme Engine [1/6]
     }
 
     static ContextImpl getImpl(Context context) {

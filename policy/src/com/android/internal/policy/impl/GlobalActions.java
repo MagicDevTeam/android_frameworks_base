@@ -31,11 +31,8 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-<<<<<<< HEAD
-=======
 import android.content.pm.PackageManager;
 import android.content.pm.ThemeUtils;
->>>>>>> 34d6168... New Theme Engine [1/6]
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.drawable.BitmapDrawable;

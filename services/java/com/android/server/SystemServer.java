@@ -28,11 +28,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
-<<<<<<< HEAD
-=======
 import android.content.res.CustomTheme;
 import android.database.ContentObserver;
->>>>>>> 34d6168... New Theme Engine [1/6]
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -835,10 +832,6 @@ class ServerThread {
                 }
             }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 34d6168... New Theme Engine [1/6]
             try {
                 Slog.i(TAG, "EdgeGesture service");
                 edgeGestureService = new EdgeGestureService(context, inputManager);
